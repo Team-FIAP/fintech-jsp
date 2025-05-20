@@ -1,0 +1,13 @@
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Lazer', 'NON_ESSENTIAL', 'bi bi-controller', '#20c997');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Viagem', 'NON_ESSENTIAL', 'bi bi-airplane', '#0dcaf0');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Streaming', 'NON_ESSENTIAL', 'bi bi-play-circle', '#f03e3e');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Academia', 'NON_ESSENTIAL', 'bi bi-barbell', '#198754');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Presentes', 'NON_ESSENTIAL', 'bi bi-gift', '#f66d9b');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Alimentação', 'ESSENTIAL', 'bi bi-cart', '#198754');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Moradia', 'ESSENTIAL', 'bi bi-house-door', '#0d6efd');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Saúde', 'ESSENTIAL', 'bi bi-heart-pulse', '#dc3545');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Água', 'ESSENTIAL', 'bi-droplet', '#0d6efd');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Luz', 'ESSENTIAL', 'bi bi-lightning', '#ffc107');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Internet', 'ESSENTIAL', 'bi bi-wifi', '#6c757d');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Educação', 'ESSENTIAL', 'bi bi-mortarboard', '#6610f2');
+INSERT INTO T_FIN_EXPENSE_CATEGORY (name, type, icon, color) VALUES ('Transporte', 'ESSENTIAL', 'bi bi-fuel-pump', '#fd7e14');
