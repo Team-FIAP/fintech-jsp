@@ -1,18 +1,22 @@
 package com.fiap.fintechjsp.model;
 
+import java.time.LocalDateTime;
+
 public class ExpenseCategory {
     private Long id;
     private String name;
     private ExpenseCategoryType type;
     private String color;
     private String icon;
+    private final LocalDateTime createdAt;
 
-    public ExpenseCategory(Long id, String name, ExpenseCategoryType type, String color, String icon) {
+    public ExpenseCategory(Long id, String name, ExpenseCategoryType type, String color, String icon, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.type = type;
         this.color = color;
         this.icon = icon;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -53,5 +57,9 @@ public class ExpenseCategory {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

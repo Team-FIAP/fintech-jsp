@@ -1,6 +1,7 @@
 package com.fiap.fintechjsp.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Investment extends Transaction {
     private String investmentType;
@@ -9,8 +10,8 @@ public class Investment extends Transaction {
     private double profitability;
     private LocalDate dueDate;
 
-    public Investment(Long id, double amount, LocalDate date, String description, String observation, TransactionType type, Account originAccount, String investmentType, String risk, String liquidity, double profitability, LocalDate dueDate) {
-        super(id, amount, date, description, observation, type, originAccount);
+    public Investment(Long id, double amount, LocalDate date, String description, String observation, Account originAccount, LocalDateTime createdAt, String investmentType, String risk, String liquidity, double profitability, LocalDate dueDate) {
+        super(id, amount, date, description, observation, TransactionType.INVESTMENT, originAccount, createdAt);
         this.investmentType = investmentType;
         this.risk = risk;
         this.liquidity = liquidity;

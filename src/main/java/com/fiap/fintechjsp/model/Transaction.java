@@ -1,6 +1,7 @@
 package com.fiap.fintechjsp.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public abstract class Transaction {
     private Long id;
@@ -10,8 +11,9 @@ public abstract class Transaction {
     private String observation;
     private final TransactionType type;
     private final Account originAccount;
+    private final LocalDateTime createdAt;
 
-    public Transaction(Long id, double amount, LocalDate date, String description, String observation, TransactionType type, Account originAccount) {
+    public Transaction(Long id, double amount, LocalDate date, String description, String observation, TransactionType type, Account originAccount, LocalDateTime createdAt) {
         this.id = id;
         this.amount = amount;
         this.date = date;
@@ -19,6 +21,7 @@ public abstract class Transaction {
         this.observation = observation;
         this.type = type;
         this.originAccount = originAccount;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -67,5 +70,9 @@ public abstract class Transaction {
 
     public Account getOriginAccount() {
         return originAccount;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
