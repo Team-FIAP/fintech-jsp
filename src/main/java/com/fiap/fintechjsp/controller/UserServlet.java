@@ -12,10 +12,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @WebServlet(name = "UserServlet", urlPatterns = {"/usuarios"})
 public class UserServlet extends HttpServlet {
     private UserDao userDao;
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        switch (action) {
+            case "cadastrar" -> {
+                req.getRequestDispatcher("cadastrar-usuario.jsp").forward(req, resp);
+            }
+            default -> {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Página não encontradae");
+            }
+        }
+    }
 
     @Override
     public void init(ServletConfig config) throws ServletException {

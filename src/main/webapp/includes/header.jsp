@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <header class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
     <a class="navbar-brand d-flex align-items-center text-light" href="#">
         <img src="../resources/img/logo.svg" alt="Logo" width="40" height="40" class="me-2">
