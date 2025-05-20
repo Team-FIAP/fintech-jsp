@@ -10,9 +10,9 @@ import java.sql.SQLException;
  * Classe responsável por gerenciar a conexão com o banco de dados.
  * Utiliza o padrão Singleton para garantir que apenas uma instância da classe exista.
  * As variáveis de ambiente são carregadas dinamicamente de acordo com o ambiente (ex: desenvolvimento, produção).
- *
+ * <p>
  * A configuração de conexão é feita via arquivos `.env`, como `.env.development`, `.env.production`, etc.
- *
+ * <p>
  * Variáveis esperadas no arquivo `.env.{ENV}`:
  * - URL: URL de conexão JDBC
  * - USER: usuário do banco de dados
@@ -20,19 +20,29 @@ import java.sql.SQLException;
  */
 public class ConnectionManager {
 
-    /** Objeto que carrega as variáveis de ambiente do arquivo `.env.{ENV}` */
+    /**
+     * Objeto que carrega as variáveis de ambiente do arquivo `.env.{ENV}`
+     */
     private static final Dotenv dotenv = loadDotenv();
 
-    /** URL JDBC para conexão com o banco de dados */
-    private static final String URL = dotenv.get("URL");
+    /**
+     * URL JDBC para conexão com o banco de dados
+     */
+    private static final String URL = dotenv.get("DB_URL");
 
-    /** Nome de usuário para conexão com o banco de dados */
-    private static final String USER = dotenv.get("USER");
+    /**
+     * Nome de usuário para conexão com o banco de dados
+     */
+    private static final String USER = dotenv.get("DB_USER");
 
-    /** Senha para conexão com o banco de dados */
-    private static final String PASS = dotenv.get("PASSWORD");
+    /**
+     * Senha para conexão com o banco de dados
+     */
+    private static final String PASS = dotenv.get("DB_PASS");
 
-    /** Instância única da classe (Singleton) */
+    /**
+     * Instância única da classe (Singleton)
+     */
     private static ConnectionManager connectionManager;
 
     /**
@@ -53,11 +63,11 @@ public class ConnectionManager {
 
         return Dotenv.configure()
                 .filename(envFile)
-                .ignoreIfMissing()
                 .load();
     }
 
-    public ConnectionManager() {}
+    public ConnectionManager() {
+    }
 
     /**
      * Retorna uma nova conexão com o banco de dados utilizando os parâmetros definidos nas variáveis de ambiente.
@@ -68,8 +78,9 @@ public class ConnectionManager {
         Connection connection = null;
 
         try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
             connection = DriverManager.getConnection(URL, USER, PASS);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace(); // Para produção, substitua por logger apropriado
         }
 
