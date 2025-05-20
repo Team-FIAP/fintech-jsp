@@ -8,27 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap 5 CSS -->
     <link href="resources/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #121212;
-            color: #f1f1f1;
-        }
-        .form-container {
-            background-color: #1f1f1f;
-            border: 1px solid #333;
-        }
-        .form-control {
-            background-color: #2a2a2a;
-            color: #f1f1f1;
-            border: 1px solid #444;
-        }
-        .form-control::placeholder {
-            color: #aaa;
-        }
-        .form-label {
-            color: #ccc;
-        }
-    </style>
+    <link href="resources/css/globals.css" rel="stylesheet">
+    <link href="resources/css/cadastrar-usuario.css" rel="stylesheet">
 </head>
 <body>
 
