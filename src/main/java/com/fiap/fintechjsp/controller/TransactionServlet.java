@@ -111,7 +111,7 @@ public class TransactionServlet extends HttpServlet {
                 resp.sendRedirect("login");
                 return;
             }
-            
+
             // Obtendo a lista de contas do usuário
             List<Account> accounts = accountDao.findAllByUserId(loggedUser.getId());
             req.setAttribute("accounts", accounts);
@@ -131,6 +131,21 @@ public class TransactionServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Carrega uma lista de transações financeiras do usuário com base nos filtros fornecidos.
+     *
+     * Este método consulta diferentes tipos de transações (receitas, despesas, transferências e investimentos)
+     * de acordo com o parâmetro {@code type}. Se {@code type} for nulo, vazio ou não especificado,
+     * todas as categorias de transações serão incluídas.
+     *
+     * @param startDate data de início do intervalo de filtro (inclusive)
+     * @param endDate data de fim do intervalo de filtro (inclusive)
+     * @param accountId ID da conta financeira a ser usada como filtro (opcional; se {@code null}, todas as contas são consideradas)
+     * @param type tipo de transação a ser filtrado: RECEITA, DESPESA, TRANSFERENCIA ou INVESTIMENTO;
+     *             se {@code null} ou em branco, todas as categorias são retornadas
+     * @param userId ID do usuário logado, cujas transações devem ser buscadas
+     * @return uma lista de transações {@link Transaction} que atendem aos critérios de filtro
+     */
     private List<Transaction> loadTransactions(LocalDate startDate, LocalDate endDate, Long accountId, String type, Long userId) {
         List<Transaction> transactions = new ArrayList<>();
 
