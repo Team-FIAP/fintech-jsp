@@ -106,6 +106,67 @@ public class IncomeDao implements BaseDao<Income, Long> {
 
     }
 
+    /**
+     * Exclui uma receita (income) do banco de dados e atualiza o saldo da conta de origem,
+     * subtraindo o valor da receita excluída.
+     *
+     * Esta operação realiza as seguintes etapas de forma transacional:
+     * <ul>
+     *   <li>Recupera os dados da receita (valor e conta de origem)</li>
+     *   <li>Subtrai o valor do saldo da conta de origem</li>
+     *   <li>Remove o registro da receita</li>
+     * </ul>
+     *
+     * Caso qualquer etapa falhe, nenhuma modificação será persistida, garantindo a integridade
+     * dos dados.
+     *
+     * @param id o identificador único da receita a ser excluída
+     * @throws DBException se a receita não for encontrada ou ocorrer algum erro
+     *         durante o processo de exclusão e atualização do saldo
+     */
+    public void delete(Long id) throws DBException {
+        String selectSql = "SELECT ORIGIN_ACCOUNT_ID, AMOUNT FROM T_FIN_INCOME WHERE ID = ?";
+        String updateAccountSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE - ? WHERE ID = ?";
+        String deleteSql = "DELETE FROM T_FIN_INCOME WHERE ID = ?";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            conn.setAutoCommit(false);
+
+            Long accountId = null;
+            double amount = 0;
+
+            // 1. Buscar dados da receita
+            try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
+                ps.setLong(1, id);
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    accountId = rs.getLong("ORIGIN_ACCOUNT_ID");
+                    amount = rs.getDouble("AMOUNT");
+                } else {
+                    throw new DBException("Receita não encontrada para exclusão.");
+                }
+            }
+
+            // 2. Atualizar saldo da conta (subtrair valor da receita)
+            try (PreparedStatement ps = conn.prepareStatement(updateAccountSql)) {
+                ps.setDouble(1, amount);
+                ps.setLong(2, accountId);
+                ps.executeUpdate();
+            }
+
+            // 3. Excluir a receita
+            try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
+                ps.setLong(1, id);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            throw new DBException("Erro ao excluir receita e atualizar saldo da conta", e);
+        }
+    }
+
     public Income fromResultSet(ResultSet rs) {
         try {
             return new Income(

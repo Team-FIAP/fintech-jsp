@@ -55,7 +55,8 @@
                 <select class="form-select" id="accountId" name="accountId">
                     <option value="">Todas</option>
                     <c:forEach var="account" items="${accounts}">
-                        <option value="${account.id}" <c:if test="${param.accountId == account.id}">selected</c:if>>${account.name}</option>
+                        <option value="${account.id}"
+                                <c:if test="${param.accountId == account.id}">selected</c:if>>${account.name}</option>
                     </c:forEach>
                 </select>
             </div>
@@ -71,6 +72,13 @@
             </div>
         </c:if>
 
+        <%-- Alerta de sucesso na remoção --%>
+        <c:if test="${not empty success}">
+            <div class="alert alert-success" role="alert">
+                Transação removida com sucesso
+            </div>
+        </c:if>
+
         <%-- Tabela --%>
         <div class="table-responsive table-wrapper">
             <table class="table table-dark table-hover table-bordered align-middle">
@@ -81,40 +89,90 @@
                     <th>Descrição</th>
                     <th>Data</th>
                     <th>Conta</th>
+                    <th class="text-nowrap text-center">Ações</th>
                 </tr>
                 </thead>
                 <tbody>
                 <c:if test="${empty transactions}">
                     <tr>
-                        <td colspan="5" class="text-center">Nenhuma movimentação financeira cadastrada para os filtros aplicados.</td>
+                        <td colspan="6" class="text-center">Nenhuma movimentação financeira cadastrada para os filtros
+                            aplicados.
+                        </td>
                     </tr>
                 </c:if>
                 <c:forEach var="trans" items="${transactions}">
+                    <c:set var="editUrl">
+                        <c:choose>
+                            <c:when test='${trans.type == "EXPENSE"}'>/despesas?action=editar&id=${trans.id}</c:when>
+                            <c:when test='${trans.type == "INCOME"}'>/receitas?action=editar&id=${trans.id}</c:when>
+                            <c:when test='${trans.type == "TRANSFER"}'>/transferencias?action=editar&id=${trans.id}</c:when>
+                            <c:when test='${trans.type == "INVESTMENT"}'>/investimentos?action=editar&id=${trans.id}</c:when>
+                            <c:otherwise>#</c:otherwise>
+                        </c:choose>
+                    </c:set>
                     <c:choose>
                         <c:when test="${trans.type == 'TRANSFER'}">
                             <tr>
                                 <td>
                                     <span class="badge bg-primary text-white rounded-pill">Transferência</span>
                                 </td>
-                                    <td class="text-danger">
-                                        - R$ <fmt:formatNumber type="number" value="${trans.amount}" pattern="0.00"/>
-                                    </td>
+                                <td class="text-danger">
+                                    - R$ <fmt:formatNumber type="number" value="${trans.amount}" pattern="0.00"/>
+                                </td>
                                 <td>${trans.description}</td>
                                 <fmt:parseDate value="${trans.date}" pattern="yyyy-MM-dd" var="parsedDate" type="date"/>
                                 <td><fmt:formatDate pattern="dd/MM/yyyy" value="${parsedDate}"/></td>
                                 <td>${trans.originAccount.name}</td>
+                                <td class="text-nowrap text-center">
+                                    <a
+                                        class="btn btn-light btn-sm me-1"
+                                        title="Editar"
+                                        href="${editUrl}"
+                                    >
+                                        Editar
+                                    </a>
+                                    <button
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#confirmDeleteModal"
+                                        data-id="${trans.id}"
+                                        data-type="${trans.type}"
+                                        class="btn btn-danger btn-sm"
+                                        title="Remover"
+                                    >
+                                        Remover
+                                    </button>
+                                </td>
                             </tr>
                             <tr>
                                 <td>
                                     <span class="badge bg-primary text-white rounded-pill">Transferência</span>
                                 </td>
-                                    <td class="text-success">
-                                        + R$ <fmt:formatNumber type="number" value="${trans.amount}" pattern="0.00"/>
-                                    </td>
+                                <td class="text-success">
+                                    + R$ <fmt:formatNumber type="number" value="${trans.amount}" pattern="0.00"/>
+                                </td>
                                 <td>${trans.description}</td>
                                 <fmt:parseDate value="${trans.date}" pattern="yyyy-MM-dd" var="parsedDate" type="date"/>
                                 <td><fmt:formatDate pattern="dd/MM/yyyy" value="${parsedDate}"/></td>
                                 <td>${trans.destinationAccount.name}</td>
+                                <td class="text-nowrap text-center">
+                                    <a
+                                        class="btn btn-light btn-sm me-1"
+                                        title="Editar"
+                                        href="${editUrl}"
+                                    >
+                                        Editar
+                                    </a>
+                                    <button
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmDeleteModal"
+                                            data-id="${trans.id}"
+                                            data-type="${trans.type}"
+                                            class="btn btn-danger btn-sm"
+                                            title="Remover"
+                                    >
+                                        Remover
+                                    </button>
+                                </td>
                             </tr>
                         </c:when>
                         <c:otherwise>
@@ -151,6 +209,25 @@
                                 <fmt:parseDate value="${trans.date}" pattern="yyyy-MM-dd" var="parsedDate" type="date"/>
                                 <td><fmt:formatDate pattern="dd/MM/yyyy" value="${parsedDate}"/></td>
                                 <td>${trans.originAccount.name}</td>
+                                <td class="text-nowrap text-center">
+                                    <a
+                                        class="btn btn-light btn-sm me-1"
+                                        title="Editar"
+                                        href="${editUrl}"
+                                    >
+                                        Editar
+                                    </a>
+                                    <button
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmDeleteModal"
+                                            data-id="${trans.id}"
+                                            data-type="${trans.type}"
+                                            class="btn btn-danger btn-sm"
+                                            title="Remover"
+                                    >
+                                        Remover
+                                    </button>
+                                </td>
                             </tr>
                         </c:otherwise>
                     </c:choose>
@@ -158,11 +235,36 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Modal de confirmação -->
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        Tem certeza que deseja remover esta transação?
+                    </div>
+                    <div class="modal-footer">
+                        <form method="post" id="deleteForm" action="transacoes-financeiras">
+                            <input type="hidden" name="action" value="excluir">
+                            <input type="hidden" name="id" id="confirmDeleteId">
+                            <input type="hidden" name="type" id="confirmDeleteType">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-danger">Remover</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 </div>
 <jsp:include page="/includes/footer.jsp"/>
 
 <script src="resources/js/bootstrap.bundle.js"></script>
 <script src="resources/js/globals.js"></script>
+<script src="resources/js/transacoes-financeiras.js"></script>
 </body>
 </html>

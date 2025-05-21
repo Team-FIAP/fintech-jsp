@@ -122,6 +122,11 @@ public class TransactionServlet extends HttpServlet {
             // Ordenando as transações
             transactions.sort(Comparator.comparing(Transaction::getDate).reversed());
 
+            String success = req.getParameter("success");
+            if (success != null) {
+                req.setAttribute("success", success);
+            }
+
             req.setAttribute("transactions", transactions);
             req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
         } catch (DBException e) {
@@ -166,5 +171,54 @@ public class TransactionServlet extends HttpServlet {
         }
 
         return transactions;
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if ("excluir".equalsIgnoreCase(action)) {
+            handleDelete(req, resp);
+        } else {
+            resp.sendRedirect("transacoes-financeiras");
+        }
+    }
+
+    private void handleDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        String type = req.getParameter("type");
+        String idParam = req.getParameter("id");
+
+        try {
+            Long id = Long.parseLong(idParam);
+
+            switch (type) {
+                case "EXPENSE":
+                    expenseDao.delete(id);
+                    req.setAttribute("success", "Despesa removida com sucesso");
+                    break;
+                case "INCOME":
+                    incomeDao.delete(id);
+                    req.setAttribute("success", "Receita removida com sucesso");
+                    break;
+                case "TRANSFER":
+                    transferDao.delete(id);
+                    req.setAttribute("success", "Transferência removida com sucesso");
+                    break;
+                case "INVESTMENT":
+                    investmentDao.delete(id);
+                    req.setAttribute("success", "Investimento removido com sucesso");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Tipo de transação inválido: " + type);
+            }
+
+            resp.sendRedirect("transacoes-financeiras?success=true");
+        } catch (NumberFormatException e) {
+            req.setAttribute("error", "ID inválido para exclusão.");
+            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+        } catch (Exception e) {
+            req.setAttribute("error", "Erro ao excluir a transação: " + e.getMessage());
+            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+        }
     }
 }
