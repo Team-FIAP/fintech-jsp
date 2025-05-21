@@ -149,6 +149,79 @@ public class TransferDao implements BaseDao<Transfer, Long> {
     }
 
     /**
+     * Exclui uma transferência existente do banco de dados, revertendo o impacto financeiro
+     * nas contas envolvidas.
+     *
+     * Esta operação realiza as seguintes etapas de forma transacional:
+     * <ul>
+     *   <li>Recupera os dados da transferência (contas de origem e destino, valor)</li>
+     *   <li>Adiciona o valor transferido de volta à conta de origem</li>
+     *   <li>Subtrai o valor transferido da conta de destino</li>
+     *   <li>Remove o registro da transferência</li>
+     * </ul>
+     *
+     * Caso qualquer etapa falhe, nenhuma modificação será persistida, garantindo integridade
+     * dos dados.
+     *
+     * @param id o identificador único da transferência a ser excluída
+     * @throws DBException se a transferência não for encontrada ou ocorrer algum erro
+     *         durante o processo de exclusão e atualização de saldos
+     */
+    public void delete(Long id) throws DBException {
+        String selectSql = "SELECT ORIGIN_ACCOUNT_ID, DESTINATION_ACCOUNT_ID, AMOUNT FROM T_FIN_TRANSFER WHERE ID = ?";
+        String updateOriginSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE + ? WHERE ID = ?";
+        String updateDestSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE - ? WHERE ID = ?";
+        String deleteSql = "DELETE FROM T_FIN_TRANSFER WHERE ID = ?";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            conn.setAutoCommit(false); // Inicia transação
+
+            Long originAccountId = null;
+            Long destinationAccountId = null;
+            double amount = 0;
+
+            // 1. Buscar os dados da transferência
+            try (PreparedStatement selectPs = conn.prepareStatement(selectSql)) {
+                selectPs.setLong(1, id);
+                ResultSet rs = selectPs.executeQuery();
+
+                if (rs.next()) {
+                    originAccountId = rs.getLong("ORIGIN_ACCOUNT_ID");
+                    destinationAccountId = rs.getLong("DESTINATION_ACCOUNT_ID");
+                    amount = rs.getDouble("AMOUNT");
+                } else {
+                    throw new DBException("Transferência não encontrada para exclusão.");
+                }
+            }
+
+            // 2. Devolver saldo à conta de origem
+            try (PreparedStatement ps = conn.prepareStatement(updateOriginSql)) {
+                ps.setDouble(1, amount);
+                ps.setLong(2, originAccountId);
+                ps.executeUpdate();
+            }
+
+            // 3. Subtrair saldo da conta de destino
+            try (PreparedStatement ps = conn.prepareStatement(updateDestSql)) {
+                ps.setDouble(1, amount);
+                ps.setLong(2, destinationAccountId);
+                ps.executeUpdate();
+            }
+
+            // 4. Excluir a transferência
+            try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
+                ps.setLong(1, id);
+                ps.executeUpdate();
+            }
+
+            conn.commit(); // Confirma transação
+
+        } catch (SQLException e) {
+            throw new DBException("Erro ao excluir transferência e atualizar saldos", e);
+        }
+    }
+
+    /**
      * Constrói um objeto {@link Transfer} a partir de um {@link ResultSet}.
      *
      * @param rs Resultado da consulta
