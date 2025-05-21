@@ -18,12 +18,5 @@ IMask(cpfElement, {
             confirmPassword.setCustomValidity("As senhas devem ser compatíveis");
             confirmFeedback.textContent = "As senhas devem ser compatíveis.";
         }
-
-        if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-
-        form.classList.add("was-validated");
     });
 })();

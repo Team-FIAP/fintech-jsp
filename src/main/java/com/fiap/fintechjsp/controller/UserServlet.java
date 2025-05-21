@@ -27,7 +27,7 @@ public class UserServlet extends HttpServlet {
                 req.getRequestDispatcher("cadastrar-usuario.jsp").forward(req, resp);
             }
             default -> {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Página não encontradae");
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Página não encontrada");
             }
         }
     }

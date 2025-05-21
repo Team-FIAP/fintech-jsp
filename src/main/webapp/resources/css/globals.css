@@ -8,7 +8,7 @@ body, html {
     display: flex;
     height: calc(100vh - 68px - 40px);
     flex-direction: column;
-    padding: 48px 32px 32px;
+    padding: 48px 32px 0;
     overflow: auto;
     flex-grow: 1;
     background-color: #f0f0f0;
