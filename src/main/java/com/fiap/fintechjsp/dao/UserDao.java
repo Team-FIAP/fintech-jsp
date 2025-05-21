@@ -186,7 +186,8 @@ public class UserDao implements BaseDao<User, Long> {
                     rs.getString("name"),
                     rs.getString("username"),
                     rs.getString("password"),
-                    rs.getString("cpf")
+                    rs.getString("cpf"),
+                    rs.getTimestamp("created_at").toLocalDateTime()
             );
         } catch (SQLException e) {
             e.printStackTrace();

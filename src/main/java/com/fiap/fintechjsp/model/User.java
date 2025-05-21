@@ -1,15 +1,19 @@
 package com.fiap.fintechjsp.model;
 
+import java.time.LocalDateTime;
+
 public class User {
     private Long id;
     private String name;
     private String username;
     private String password;
     private String cpf;
+    private LocalDateTime createdAt;
 
-    public User(Long id, String name, String email, String password, String cpf) {
+    public User(Long id, String name, String email, String password, String cpf, LocalDateTime createdAt) {
         this(name, email, password, cpf);
         this.id = id;
+        this.createdAt = createdAt;
     }
 
     public User(String name, String username, String password, String cpf) {
@@ -60,6 +64,14 @@ public class User {
 
     public void setCpf(String cpf) {
         this.cpf = cpf;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     @Override

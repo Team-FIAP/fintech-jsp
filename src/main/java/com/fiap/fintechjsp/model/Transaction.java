@@ -23,7 +23,7 @@ public abstract class Transaction {
         this.originAccount = originAccount;
         this.createdAt = createdAt;
     }
-
+    
     public Long getId() {
         return id;
     }
