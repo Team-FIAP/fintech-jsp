@@ -71,6 +71,7 @@
 <script src="resources/js/imask.js"></script>
 <!-- Bootstrap JS -->
 <script src="resources/js/bootstrap.bundle.js"></script>
+<script src="resources/js/globals.js"></script>
 <script src="resources/js/cadastrar-usuario.js"></script>
 </body>
 </html>
