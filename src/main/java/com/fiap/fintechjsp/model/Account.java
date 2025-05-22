@@ -7,7 +7,7 @@ public class Account {
     private String name;
     private double balance;
     private final User user;
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     public Account(Long id, String name, double balance, User user, LocalDateTime createdAt) {
         this.id = id;
@@ -15,6 +15,13 @@ public class Account {
         this.balance = balance;
         this.user = user;
         this.createdAt = createdAt;
+    }
+
+    public Account(String name, double balance, User user) {
+        this.name = name;
+        this.balance = balance;
+        this.user = user;
+
     }
 
     public Long getId() {
