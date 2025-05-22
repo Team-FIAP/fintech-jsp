@@ -96,7 +96,7 @@ public class AccountServlet extends HttpServlet {
 
             // Checks if there are accounts with duplicate names
             if(accountDao.existsByName(name)) {
-                req.setAttribute("error", "Já existe uma conta cadastrada com essse nome");
+                req.setAttribute("error", "Já existe uma conta cadastrada com esse nome");
                 req.getRequestDispatcher("cadastrar-conta.jsp").forward(req, resp);
                 return;
             }
