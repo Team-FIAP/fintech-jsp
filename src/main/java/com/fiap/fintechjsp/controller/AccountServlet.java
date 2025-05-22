@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @WebServlet(name = "AccountServlet", urlPatterns = {"/contas", "/contas/listar-contas"})
@@ -27,6 +28,7 @@ public class AccountServlet extends HttpServlet {
         switch (action){
             case "createAccount" -> createAccount(req, resp);
             case "removeAccount" -> removeAccount(req, resp);
+            case "listAccounts" -> listAccounts(req, resp);
         }
     }
 
@@ -136,6 +138,9 @@ public class AccountServlet extends HttpServlet {
         try {
             // Get accounts for logged-in user
             List<Account> accounts = accountDao.findAllByUserId(loggedUser.getId());
+
+            // Order accounts alphabetically
+            accounts.sort(Comparator.comparing(Account::getName, String.CASE_INSENSITIVE_ORDER));
 
             // Add debug message
             System.out.println("Found " + accounts.size() + " accounts for user ID: " + loggedUser.getId());
