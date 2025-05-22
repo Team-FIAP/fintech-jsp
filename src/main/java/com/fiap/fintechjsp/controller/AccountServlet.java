@@ -26,6 +26,7 @@ public class AccountServlet extends HttpServlet {
 
         switch (action){
             case "createAccount" -> createAccount(req, resp);
+            case "removeAccount" -> removeAccount(req, resp);
         }
     }
 
@@ -58,22 +59,6 @@ public class AccountServlet extends HttpServlet {
 
         // Create test user
         User testUser = new User(1l, "WIll", "will@email.com", "123", "111.111.111-11", LocalDateTime.now());
-
-//        try {
-//            // Check if test user exists in database, if not, insert it
-//
-//            if (testUser == null) {
-//                System.out.println("Test user not found, inserting into database...");
-//                userDao.insert(testUser);
-//                System.out.println("Test user inserted successfully");
-//            } else {
-//                System.out.println("Test user already exists in database");
-//                testUser = testUser; // Use the existing user from database
-//            }
-//        } catch (DBException e) {
-//            System.out.println("Error checking/inserting test user: " + e.getMessage());
-//            e.printStackTrace();
-//        }
 
         req.getSession().setAttribute("loggedUser", testUser);
 
@@ -171,6 +156,66 @@ public class AccountServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("error", "Erro ao carregar as contas.");
+            req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+        }
+    }
+
+    private void removeAccount(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        User loggedUser = (User) req.getSession().getAttribute("loggedUser");
+        if (loggedUser == null) {
+            resp.sendRedirect("login.jsp");
+            return;
+        }
+
+        try {
+            // Get account ID
+            String accountIdStr = req.getParameter("accountId");
+            if (accountIdStr == null || accountIdStr.isEmpty()) {
+                req.setAttribute("error", "ID da conta não fornecido.");
+                req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+                return;
+            }
+
+            Long accountId = Long.parseLong(accountIdStr);
+
+            // Find account to remove
+            Account accountToRemove = accountDao.findById(accountId);
+
+            if (accountToRemove == null) {
+                req.setAttribute("error", "Conta não encontrada.");
+                req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+                return;
+            }
+
+//            // Security check: Make sure the account belongs to the logged user
+//            if (!accountToRemove.getUser().getId().equals(loggedUser.getId())) {
+//                req.setAttribute("error", "Você não tem permissão para remover esta conta.");
+//                req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+//                return;
+//            }
+
+            // Delete the account
+            accountDao.delete(accountToRemove);
+
+            // Debug Statement
+            System.out.println("Account removed successfully: " + accountToRemove.getName());
+
+            // Set success message in session (so it persists through redirect)
+            req.getSession().setAttribute("message", "Conta removida com sucesso!");
+
+            // Redirect to avoid form resubmission on refresh
+            resp.sendRedirect("contas?action=list");
+
+        } catch (NumberFormatException e) {
+            req.setAttribute("error", "ID da conta inválido.");
+            req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+        } catch (DBException e) {
+            e.printStackTrace();
+            req.setAttribute("error", "Erro ao remover a conta do banco de dados.");
+            req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            req.setAttribute("error", "Erro interno. Tente novamente.");
             req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
         }
     }

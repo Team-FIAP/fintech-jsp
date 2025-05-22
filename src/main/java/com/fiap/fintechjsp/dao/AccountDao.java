@@ -46,7 +46,7 @@ public class AccountDao implements BaseDao<Account, Long> {
                 "                u.CPF user_cpf,\n" +
                 "                u.CREATED_AT user_created_at\n" +
                 "            FROM T_FIN_ACCOUNT a\n" +
-                "            INNER JOIN T_FIN_USER u ON a.USER_ID = u.ID" +
+                "            INNER JOIN T_FIN_USER u ON a.USER_ID = u.ID " +
                 "WHERE a.ID = ?";
 
         try (Connection conn = ConnectionManager.getInstance().getConnection();
@@ -67,7 +67,7 @@ public class AccountDao implements BaseDao<Account, Long> {
         String sql = "INSERT INTO T_FIN_ACCOUNT (NAME, BALANCE, USER_ID) VALUES (?, ?, ?)";
 
         try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
             System.out.println("Inserting account:");
             System.out.println("Name: " + account.getName());
@@ -147,7 +147,7 @@ public class AccountDao implements BaseDao<Account, Long> {
     }
 
     public boolean existsByName(String name) {
-        String sql = "SELECT * FROM T_FIN_ACCOUNT WHERE UPPER(NAME) = ?";
+        String sql = "SELECT * FROM T_FIN_ACCOUNT WHERE UPPER(NAME) = UPPER(?)";
 
         try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

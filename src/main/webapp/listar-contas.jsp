@@ -55,14 +55,15 @@
                             <td>${account.name}</td>
                             <td>R$ ${account.balance}</td>
                             <td>
-                                <form action="editAccount" method="get" class="d-inline">
+                                <form action="contas" method="get" class="d-inline">
                                     <input type="hidden" name="id" value="${account.id}">
                                     <button type="submit" class="btn btn-outline-warning btn-sm">
                                         <i class="bi bi-pencil-square"></i> Editar
                                     </button>
                                 </form>
-                                <form action="deleteAccount" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta conta?');">
-                                    <input type="hidden" name="id" value="${account.id}">
+                                <form action="contas" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta conta?');">
+                                    <input type="hidden" name="action" value="removeAccount">
+                                    <input type="hidden" name="accountId" value="${account.id}">
                                     <button type="submit" class="btn btn-outline-danger btn-sm">
                                         <i class="bi bi-trash"></i> Excluir
                                     </button>
