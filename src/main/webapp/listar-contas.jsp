@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -53,7 +54,7 @@
                     <c:forEach var="account" items="${accounts}">
                         <tr>
                             <td>${account.name}</td>
-                            <td>R$ ${account.balance}</td>
+                            <td>R$ <fmt:formatNumber value="${account.balance}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
                             <td>
                                 <form action="contas" method="get" class="d-inline">
                                     <input type="hidden" name="id" value="${account.id}">
