@@ -72,6 +72,16 @@
                             </td>
                         </tr>
                     </c:forEach>
+                    <tr>
+                        <td colspan="3" style="height: 30px; border: none; background-color: #f0f0f0;"></td>
+                    </tr>
+                    <tr>
+                        <td><b>Saldo Total:</b></td>
+                        <td>
+                            R$ <fmt:formatNumber value="${totalBalance}" type="number" minFractionDigits="2" maxFractionDigits="2" />
+                        </td>
+                        <td></td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
