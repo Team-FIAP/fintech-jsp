@@ -67,10 +67,16 @@ public class AccountDao implements BaseDao<Account, Long> {
         String sql = "INSERT INTO T_FIN_ACCOUNT (NAME, BALANCE, USER_ID) VALUES (?, ?, ?)";
 
         try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) { // Added RETURN_GENERATED_KEYS flag
+             PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            System.out.println("Inserting account:");
+            System.out.println("Name: " + account.getName());
+            System.out.println("Balance: " + account.getBalance());
+            System.out.println("User ID: " + account.getUser().getId());
+
             ps.setString(1, account.getName());
             ps.setDouble(2, account.getBalance());
-            ps.setLong(3, account.getUser().getId()); // Fixed: Use user's ID instead of account's ID
+            ps.setLong(3, account.getUser().getId());
             ps.executeUpdate();
 
             ResultSet rs = ps.getGeneratedKeys();
@@ -79,6 +85,7 @@ public class AccountDao implements BaseDao<Account, Long> {
                 return findById(generatedId);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DBException(e);
         }
         return null;
@@ -154,7 +161,7 @@ public class AccountDao implements BaseDao<Account, Long> {
         return false;
     }
 
-    public List<Account> getByUserId(Long userId) {
+    public List<Account> findAllByUserId(Long userId) {
         String sql = "SELECT\n" +
                 "                a.ID,\n" +
                 "                a.NAME,\n" +
