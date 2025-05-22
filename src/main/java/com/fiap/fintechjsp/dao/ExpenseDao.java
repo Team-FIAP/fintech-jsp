@@ -111,6 +111,68 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
 
     }
 
+    /**
+     * Exclui uma despesa do banco de dados e atualiza o saldo da conta de origem,
+     * adicionando o valor da despesa de volta à conta.
+     *
+     * Esta operação realiza as seguintes etapas de forma transacional:
+     * <ul>
+     *   <li>Recupera os dados da despesa (valor e conta de origem)</li>
+     *   <li>Adiciona o valor ao saldo da conta de origem</li>
+     *   <li>Remove o registro da despesa</li>
+     * </ul>
+     *
+     * Caso qualquer etapa falhe, nenhuma modificação será persistida, garantindo a integridade
+     * dos dados.
+     *
+     * @param id o identificador único da despesa a ser excluída
+     * @throws DBException se a despesa não for encontrada ou ocorrer algum erro
+     *         durante o processo de exclusão e atualização do saldo
+     */
+    public void delete(Long id) throws DBException {
+        String selectSql = "SELECT ORIGIN_ACCOUNT_ID, AMOUNT FROM T_FIN_EXPENSE WHERE ID = ?";
+        String updateAccountSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE + ? WHERE ID = ?";
+        String deleteSql = "DELETE FROM T_FIN_EXPENSE WHERE ID = ?";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            conn.setAutoCommit(false);
+
+            Long accountId = null;
+            double amount = 0;
+
+            // 1. Buscar dados da despesa
+            try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
+                ps.setLong(1, id);
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    accountId = rs.getLong("ORIGIN_ACCOUNT_ID");
+                    amount = rs.getDouble("AMOUNT");
+                } else {
+                    throw new DBException("Despesa não encontrada para exclusão.");
+                }
+            }
+
+            // 2. Atualizar saldo da conta (restituir o valor)
+            try (PreparedStatement ps = conn.prepareStatement(updateAccountSql)) {
+                ps.setDouble(1, amount);
+                ps.setLong(2, accountId);
+                ps.executeUpdate();
+            }
+
+            // 3. Excluir a despesa
+            try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
+                ps.setLong(1, id);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            throw new DBException("Erro ao excluir despesa e atualizar saldo da conta", e);
+        }
+    }
+
+
     public Expense fromResultSet(ResultSet rs) {
         try {
             return new Expense(

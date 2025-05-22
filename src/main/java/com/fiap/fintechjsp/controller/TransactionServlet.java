@@ -111,7 +111,7 @@ public class TransactionServlet extends HttpServlet {
                 resp.sendRedirect("login");
                 return;
             }
-            
+
             // Obtendo a lista de contas do usuário
             List<Account> accounts = accountDao.findAllByUserId(loggedUser.getId());
             req.setAttribute("accounts", accounts);
@@ -122,6 +122,11 @@ public class TransactionServlet extends HttpServlet {
             // Ordenando as transações
             transactions.sort(Comparator.comparing(Transaction::getDate).reversed());
 
+            String success = req.getParameter("success");
+            if (success != null) {
+                req.setAttribute("success", success);
+            }
+
             req.setAttribute("transactions", transactions);
             req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
         } catch (DBException e) {
@@ -131,6 +136,21 @@ public class TransactionServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Carrega uma lista de transações financeiras do usuário com base nos filtros fornecidos.
+     *
+     * Este método consulta diferentes tipos de transações (receitas, despesas, transferências e investimentos)
+     * de acordo com o parâmetro {@code type}. Se {@code type} for nulo, vazio ou não especificado,
+     * todas as categorias de transações serão incluídas.
+     *
+     * @param startDate data de início do intervalo de filtro (inclusive)
+     * @param endDate data de fim do intervalo de filtro (inclusive)
+     * @param accountId ID da conta financeira a ser usada como filtro (opcional; se {@code null}, todas as contas são consideradas)
+     * @param type tipo de transação a ser filtrado: RECEITA, DESPESA, TRANSFERENCIA ou INVESTIMENTO;
+     *             se {@code null} ou em branco, todas as categorias são retornadas
+     * @param userId ID do usuário logado, cujas transações devem ser buscadas
+     * @return uma lista de transações {@link Transaction} que atendem aos critérios de filtro
+     */
     private List<Transaction> loadTransactions(LocalDate startDate, LocalDate endDate, Long accountId, String type, Long userId) {
         List<Transaction> transactions = new ArrayList<>();
 
@@ -151,5 +171,54 @@ public class TransactionServlet extends HttpServlet {
         }
 
         return transactions;
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if ("excluir".equalsIgnoreCase(action)) {
+            handleDelete(req, resp);
+        } else {
+            resp.sendRedirect("transacoes-financeiras");
+        }
+    }
+
+    private void handleDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        String type = req.getParameter("type");
+        String idParam = req.getParameter("id");
+
+        try {
+            Long id = Long.parseLong(idParam);
+
+            switch (type) {
+                case "EXPENSE":
+                    expenseDao.delete(id);
+                    req.setAttribute("success", "Despesa removida com sucesso");
+                    break;
+                case "INCOME":
+                    incomeDao.delete(id);
+                    req.setAttribute("success", "Receita removida com sucesso");
+                    break;
+                case "TRANSFER":
+                    transferDao.delete(id);
+                    req.setAttribute("success", "Transferência removida com sucesso");
+                    break;
+                case "INVESTMENT":
+                    investmentDao.delete(id);
+                    req.setAttribute("success", "Investimento removido com sucesso");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Tipo de transação inválido: " + type);
+            }
+
+            resp.sendRedirect("transacoes-financeiras?success=true");
+        } catch (NumberFormatException e) {
+            req.setAttribute("error", "ID inválido para exclusão.");
+            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+        } catch (Exception e) {
+            req.setAttribute("error", "Erro ao excluir a transação: " + e.getMessage());
+            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+        }
     }
 }
