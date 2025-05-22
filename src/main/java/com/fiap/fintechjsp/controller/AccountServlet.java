@@ -25,9 +25,10 @@ public class AccountServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
 
-        switch (action){
+        switch (action) {
             case "createAccount" -> createAccount(req, resp);
             case "removeAccount" -> removeAccount(req, resp);
+            case "editAccount" -> editAccount(req, resp);
             case "listAccounts" -> listAccounts(req, resp);
         }
     }
@@ -46,6 +47,10 @@ public class AccountServlet extends HttpServlet {
         else if (path.equals("/contas/listar-contas")) {
             listAccounts(req, resp);
         }
+
+        else if ("editAccount".equals(action)){
+            showEditForm(req, resp);
+        }
     }
 
 
@@ -55,7 +60,7 @@ public class AccountServlet extends HttpServlet {
         accountDao = new AccountDao();
     }
 
-    private void createAccount(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+    private void createAccount(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         UserDao userDao = new UserDao();
 
@@ -88,14 +93,14 @@ public class AccountServlet extends HttpServlet {
             balance = Double.parseDouble(strBalance);
 
             // Checks if balance is positive
-            if (balance < 0){
+            if (balance < 0) {
                 req.setAttribute("error", "O saldo deve ser positívo");
                 req.getRequestDispatcher("cadastrar-conta.jsp").forward(req, resp);
                 return;
             }
 
             // Checks if there are accounts with duplicate names
-            if(accountDao.existsByName(name)) {
+            if (accountDao.existsByName(name)) {
                 req.setAttribute("error", "Já existe uma conta cadastrada com esse nome");
                 req.getRequestDispatcher("cadastrar-conta.jsp").forward(req, resp);
                 return;
@@ -117,11 +122,11 @@ public class AccountServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             req.setAttribute("error", "Formato de saldo inválido.");
             req.getRequestDispatcher("cadastrar-conta.jsp").forward(req, resp);
-        } catch (DBException e){
+        } catch (DBException e) {
             e.printStackTrace();
             req.setAttribute("error", "Erro ao cadastrar a conta no banco de dados.");
             req.getRequestDispatcher("cadastrar-conta.jsp").forward(req, resp);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("error", "Por favor, valide os campos e tente novamente.");
             req.getRequestDispatcher("cadastrar-conta.jsp").forward(req, resp);
@@ -198,12 +203,6 @@ public class AccountServlet extends HttpServlet {
                 return;
             }
 
-//            // Security check: Make sure the account belongs to the logged user
-//            if (!accountToRemove.getUser().getId().equals(loggedUser.getId())) {
-//                req.setAttribute("error", "Você não tem permissão para remover esta conta.");
-//                req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
-//                return;
-//            }
 
             // Delete the account
             accountDao.delete(accountToRemove);
@@ -229,5 +228,82 @@ public class AccountServlet extends HttpServlet {
             req.setAttribute("error", "Erro interno. Tente novamente.");
             req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
         }
+    }
+
+    private void editAccount(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        User loggedUser = (User) req.getSession().getAttribute("loggedUser");
+        if (loggedUser == null) {
+            resp.sendRedirect("login.jsp");
+            return;
+        }
+
+        String name = req.getParameter("nome");
+
+        if (name == null || name.trim().isEmpty()) {
+            req.setAttribute("error", "Nome da conta é obrigatório.");
+            req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+            return;
+        }
+
+        try {
+            // Get account ID
+            String accountIdStr = req.getParameter("accountId");
+            if (accountIdStr == null || accountIdStr.isEmpty()) {
+                req.setAttribute("error", "ID da conta não fornecido.");
+                req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+                return;
+            }
+
+            Long accountId = Long.parseLong(accountIdStr);
+
+            // Find account to edit
+            Account accountToEdit = accountDao.findById(accountId);
+
+            if (accountToEdit == null) {
+                req.setAttribute("error", "Conta não encontrada.");
+                req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+                return;
+            }
+
+            // Checks if there are accounts with duplicate names
+            if (accountDao.existsByName(name)) {
+                req.setAttribute("error", "Já existe uma conta cadastrada com esse nome");
+                req.getRequestDispatcher("editar-conta.jsp").forward(req, resp);
+                return;
+            }
+
+            //change account name
+            accountToEdit.setName(name);
+            accountDao.update(accountToEdit);
+
+            // Debug Statement
+            System.out.println("Account name successfully edited to : " + accountToEdit.getName());
+
+            // Set success message in session
+            req.getSession().setAttribute("message", "Conta editada com sucesso!");
+
+            // Redirect to avoid form resubmission on refresh
+            resp.sendRedirect("contas?action=list");
+
+
+        } catch (DBException e) {
+            e.printStackTrace();
+            req.setAttribute("error", "Erro ao editar a conta no banco de dados.");
+            req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            req.setAttribute("error", "Erro interno. Tente novamente.");
+            req.getRequestDispatcher("listar-contas.jsp").forward(req, resp);
+        }
+    }
+
+    private void showEditForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Get account by ID and forward to edit form JSP
+        String accountIdStr = req.getParameter("accountId");
+        Long accountId = Long.parseLong(accountIdStr);
+        Account account = accountDao.findById(accountId);
+
+        req.setAttribute("account", account);
+        req.getRequestDispatcher("editar-conta.jsp").forward(req, resp);
     }
 }

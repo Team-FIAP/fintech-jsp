@@ -57,7 +57,8 @@
                             <td>R$ <fmt:formatNumber value="${account.balance}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
                             <td>
                                 <form action="contas" method="get" class="d-inline">
-                                    <input type="hidden" name="id" value="${account.id}">
+                                    <input type="hidden" name="action" value="editAccount">
+                                    <input type="hidden" name="accountId" value="${account.id}">
                                     <button type="submit" class="btn btn-outline-warning btn-sm">
                                         <i class="bi bi-pencil-square"></i> Editar
                                     </button>

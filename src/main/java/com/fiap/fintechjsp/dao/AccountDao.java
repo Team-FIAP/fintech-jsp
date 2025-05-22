@@ -109,6 +109,8 @@ public class AccountDao implements BaseDao<Account, Long> {
         }
     }
 
+
+
     @Override
     public void delete(Account account) throws DBException {
         String sql = "DELETE FROM T_FIN_ACCOUNT WHERE ID = ?";
