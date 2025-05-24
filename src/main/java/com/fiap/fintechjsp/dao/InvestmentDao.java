@@ -35,6 +35,8 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
                 i.LIQUIDITY,
                 i.PROFITABILITY,
                 i.DUE_DATE,
+                i.INTEREST_RATE,
+                i.REDEEMED,
                 i.CREATED_AT,
                 oa.id origin_account_id,
                 oa.name origin_account_name,
@@ -195,7 +197,9 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
                 rs.getDouble("PROFITABILITY"),
                 rs.getDate("DUE_DATE") != null
                     ? rs.getDate("DUE_DATE").toLocalDate()
-                    : null
+                    : null,
+                rs.getDouble("INTEREST_RATE"),
+                rs.getBoolean("REDEEMED")
             );
         } catch (SQLException e) {
             e.printStackTrace();

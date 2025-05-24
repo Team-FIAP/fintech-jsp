@@ -18,7 +18,7 @@
     <jsp:include page="/includes/sidebar.jsp"/>
 
     <main class="layout">
-        <h2 class="mb-4">Transações Financeiras</h2>
+        <h1 class="mb-4">Transações Financeiras</h1>
 
         <%-- Filtros --%>
         <form method="get" class="row g-3 mb-4 needs-validation" novalidate>
@@ -75,7 +75,7 @@
         <%-- Alerta de sucesso na remoção --%>
         <c:if test="${not empty success}">
             <div class="alert alert-success" role="alert">
-                Transação removida com sucesso
+                Transação removida com sucesso!
             </div>
         </c:if>
 

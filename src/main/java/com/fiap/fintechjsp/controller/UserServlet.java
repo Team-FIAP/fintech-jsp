@@ -24,6 +24,7 @@ public class UserServlet extends HttpServlet {
 
         switch (action) {
             case "cadastrar" -> {
+                
                 req.getRequestDispatcher("cadastrar-usuario.jsp").forward(req, resp);
             }
             default -> {

@@ -9,14 +9,34 @@ public class Investment extends Transaction {
     private String liquidity;
     private double profitability;
     private LocalDate dueDate;
+    private double interestRate;
+    private boolean redeemed;
 
-    public Investment(Long id, double amount, LocalDate date, String description, String observation, Account originAccount, LocalDateTime createdAt, String investmentType, String risk, String liquidity, double profitability, LocalDate dueDate) {
+    public Investment(Long id, double amount, LocalDate date, String description, String observation, Account originAccount, LocalDateTime createdAt, String investmentType, String risk, String liquidity, double profitability, LocalDate dueDate, double interestRate, boolean redeemed) {
         super(id, amount, date, description, observation, TransactionType.INVESTMENT, originAccount, createdAt);
         this.investmentType = investmentType;
         this.risk = risk;
         this.liquidity = liquidity;
         this.profitability = profitability;
         this.dueDate = dueDate;
+        this.interestRate = interestRate;
+        this.redeemed = redeemed;
+    }
+
+    public double getInterestRate() {
+        return interestRate;
+    }
+
+    public void setInterestRate(double interestRate) {
+        this.interestRate = interestRate;
+    }
+
+    public boolean isRedeemed() {
+        return redeemed;
+    }
+
+    public void setRedeemed(boolean redeemed) {
+        this.redeemed = redeemed;
     }
 
     public String getInvestmentType() {

@@ -3,10 +3,12 @@ package com.fiap.fintechjsp.dao;
 import com.fiap.fintechjsp.exception.DBException;
 import com.fiap.fintechjsp.model.Account;
 import com.fiap.fintechjsp.model.Income;
+import com.fiap.fintechjsp.model.User;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class IncomeDao implements BaseDao<Income, Long> {
@@ -23,22 +25,22 @@ public class IncomeDao implements BaseDao<Income, Long> {
     public List<Income> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId) {
         List<Income> incomes = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
-            SELECT 
-                i.ID,
-                i.DESCRIPTION,
-                i.OBSERVATION,
-                i.AMOUNT,
-                i."DATE",
-                i.CREATED_AT,
-                oa.ID origin_account_id,
-                oa.NAME origin_account_name,
-                oa.BALANCE origin_account_balance,
-                oa.CREATED_AT origin_account_created_at
-            FROM T_FIN_INCOME i
-            INNER JOIN T_FIN_ACCOUNT oa
-            ON i.ORIGIN_ACCOUNT_ID = oa.ID
-            WHERE 1=1
-        """);
+                    SELECT 
+                        i.ID,
+                        i.DESCRIPTION,
+                        i.OBSERVATION,
+                        i.AMOUNT,
+                        i."DATE",
+                        i.CREATED_AT,
+                        oa.ID origin_account_id,
+                        oa.NAME origin_account_name,
+                        oa.BALANCE origin_account_balance,
+                        oa.CREATED_AT origin_account_created_at
+                    FROM T_FIN_INCOME i
+                    INNER JOIN T_FIN_ACCOUNT oa
+                    ON i.ORIGIN_ACCOUNT_ID = oa.ID
+                    WHERE 1=1
+                """);
 
         if (startDate != null) {
             sql.append(" AND TRUNC(i.\"DATE\") >= ?");
@@ -109,20 +111,20 @@ public class IncomeDao implements BaseDao<Income, Long> {
     /**
      * Exclui uma receita (income) do banco de dados e atualiza o saldo da conta de origem,
      * subtraindo o valor da receita excluída.
-     *
+     * <p>
      * Esta operação realiza as seguintes etapas de forma transacional:
      * <ul>
      *   <li>Recupera os dados da receita (valor e conta de origem)</li>
      *   <li>Subtrai o valor do saldo da conta de origem</li>
      *   <li>Remove o registro da receita</li>
      * </ul>
-     *
+     * <p>
      * Caso qualquer etapa falhe, nenhuma modificação será persistida, garantindo a integridade
      * dos dados.
      *
      * @param id o identificador único da receita a ser excluída
      * @throws DBException se a receita não for encontrada ou ocorrer algum erro
-     *         durante o processo de exclusão e atualização do saldo
+     *                     durante o processo de exclusão e atualização do saldo
      */
     public void delete(Long id) throws DBException {
         String selectSql = "SELECT ORIGIN_ACCOUNT_ID, AMOUNT FROM T_FIN_INCOME WHERE ID = ?";
@@ -170,24 +172,100 @@ public class IncomeDao implements BaseDao<Income, Long> {
     public Income fromResultSet(ResultSet rs) {
         try {
             return new Income(
-                rs.getLong("ID"),
-                rs.getDouble("AMOUNT"),
-                rs.getDate("DATE").toLocalDate(),
-                rs.getString("DESCRIPTION"),
-                rs.getString("OBSERVATION"),
-                new Account(
-                        rs.getLong("origin_account_id"),
-                        rs.getString("origin_account_name"),
-                        rs.getDouble("origin_account_balance"),
-                        null,
-                        rs.getTimestamp("origin_account_created_at").toLocalDateTime()
-                ),
-                rs.getTimestamp("CREATED_AT").toLocalDateTime()
+                    rs.getLong("ID"),
+                    rs.getDouble("AMOUNT"),
+                    rs.getDate("DATE").toLocalDate(),
+                    rs.getString("DESCRIPTION"),
+                    rs.getString("OBSERVATION"),
+                    new Account(
+                            rs.getLong("origin_account_id"),
+                            rs.getString("origin_account_name"),
+                            rs.getDouble("origin_account_balance"),
+                            null,
+                            rs.getTimestamp("origin_account_created_at").toLocalDateTime()
+                    ),
+                    rs.getTimestamp("CREATED_AT").toLocalDateTime()
             );
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    /**
+     * Retorna o total de receitas de um usuário dentro de um período específico.
+     *
+     * @param loggedUser O usuário cujas receitas devem ser somadas.
+     * @param startDate  A data inicial do período (inclusive).
+     * @param endDate    A data final do período (inclusive).
+     * @return O valor total das receitas no período informado. Retorna 0.0 se não houver receitas ou em caso de erro.
+     */
+    public double getTotalIncomesForUserByPeriod(User loggedUser, LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                    SELECT SUM(i.AMOUNT)
+                    FROM T_FIN_INCOME i
+                    INNER JOIN T_FIN_ACCOUNT a ON i.ORIGIN_ACCOUNT_ID = a.ID
+                    WHERE a.USER_ID = ?
+                    AND i."DATE" BETWEEN ? AND ?
+                """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, loggedUser.getId());
+            ps.setDate(2, java.sql.Date.valueOf(startDate));
+            ps.setDate(3, java.sql.Date.valueOf(endDate));
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDouble(1); // índice começa em 1
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Retorna o total de receitas mês a mês para um usuário em um ano específico.
+     *
+     * @param loggedUser O usuário logado.
+     * @param year       O ano de referência (ex: 2025).
+     * @return Lista com 12 posições representando o total de receitas de janeiro a dezembro.
+     */
+    public List<Double> getMonthlyIncomesForUserByYear(User loggedUser, int year) {
+        List<Double> monthlyIncomes = new ArrayList<>(Collections.nCopies(12, 0.0));
+
+        String sql = """
+                    SELECT EXTRACT(MONTH FROM i."DATE") month, SUM(i.AMOUNT) total
+                    FROM T_FIN_INCOME i
+                    INNER JOIN T_FIN_ACCOUNT a ON i.ORIGIN_ACCOUNT_ID = a.ID
+                    WHERE a.USER_ID = ?
+                    AND EXTRACT(YEAR FROM i."DATE") = ?
+                    GROUP BY EXTRACT(MONTH FROM i."DATE")
+                """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, loggedUser.getId());
+            ps.setInt(2, year);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int month = rs.getInt("month");
+                double total = rs.getDouble("total");
+                monthlyIncomes.set(month - 1, total);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return monthlyIncomes;
     }
 }
