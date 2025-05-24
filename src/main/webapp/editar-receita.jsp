@@ -52,11 +52,12 @@
                                     </select>
                                 </div>
                             </div>
+                            <div></div>
                             <label class="mt-3 fw-bold" for="id-descricao">Descrição</label>
                             <div class="form-floating">
                                     <textarea class="form-control" placeholder="Descrição" id="id-descricao"
                                               style="height: 100px" maxlength="255">${income.description}</textarea>
-                                <label for="descricao" value="${income.description}>Descrição</label>
+                                <label for="descricao" value="${income.description}">Descrição</label>
                             </div>
 
                             <div class=" form-group mt-3">

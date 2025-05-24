@@ -10,9 +10,46 @@ import java.util.List;
 
 public class ExpenseDao implements BaseDao<Expense, Long> {
     @Override
-    public Expense findById(Long aLong) {
+    public Expense findById(Long id) {
+
+        String sql = "SELECT \n" +
+                " e.ID,\n" +
+                "e.DESCRIPTION,\n" +
+                "e.OBSERVATION,\n" +
+                "e.AMOUNT,\n" +
+                "e.\"date\",\n" +
+                "e.CREATED_AT,\n" +
+                "oa.ID origin_account_id,\n" +
+                "oa.NAME origin_account_name,\n" +
+                "oa.BALANCE origin_account_balance,\n" +
+                "oa.CREATED_AT origin_account_created_at,\n" +
+                "ec.ID expense_category_id,\n" +
+                "ec.NAME expense_category_name,\n" +
+                "ec.TYPE expense_category_type,\n" +
+                "ec.ICON expense_category_icon,\n" +
+                "ec.COLOR expense_category_color,\n" +
+                "ec.CREATED_AT expense_category_created_at\n" +
+                "FROM T_FIN_EXPENSE e\n" +
+                "INNER JOIN T_FIN_ACCOUNT oa ON e.ACCOUNT_ID = oa.ID\n" +
+                "INNER JOIN T_FIN_EXPENSE_CATEGORY ec ON e.CATEGORY_ID = ec.ID\n" +
+                "                    WHERE e.ID = ?\n" +
+                "";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return fromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
+
 
     @Override
     public List<Expense> findAll() {
@@ -22,28 +59,28 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
     public List<Expense> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId) {
         List<Expense> expenses = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
-            SELECT 
-                e.ID,
-                e.DESCRIPTION,
-                e.OBSERVATION,
-                e.AMOUNT,
-                e."DATE",
-                e.CREATED_AT,
-                oa.ID origin_account_id,
-                oa.NAME origin_account_name,
-                oa.BALANCE origin_account_balance,
-                oa.CREATED_AT origin_account_created_at,
-                ec.ID expense_category_id,
-                ec.NAME expense_category_name,
-                ec.TYPE expense_category_type,
-                ec.ICON expense_category_icon,
-                ec.COLOR expense_category_color,
-                ec.CREATED_AT expense_category_created_at
-            FROM T_FIN_EXPENSE e
-            INNER JOIN T_FIN_ACCOUNT oa ON e.ORIGIN_ACCOUNT_ID = oa.ID
-            INNER JOIN T_FIN_EXPENSE_CATEGORY ec ON e.CATEGORY_ID = ec.ID
-            WHERE 1=1
-        """);
+                    SELECT 
+                        e.ID,
+                        e.DESCRIPTION,
+                        e.OBSERVATION,
+                        e.AMOUNT,
+                        e."DATE",
+                        e.CREATED_AT,
+                        oa.ID origin_account_id,
+                        oa.NAME origin_account_name,
+                        oa.BALANCE origin_account_balance,
+                        oa.CREATED_AT origin_account_created_at,
+                        ec.ID expense_category_id,
+                        ec.NAME expense_category_name,
+                        ec.TYPE expense_category_type,
+                        ec.ICON expense_category_icon,
+                        ec.COLOR expense_category_color,
+                        ec.CREATED_AT expense_category_created_at
+                    FROM T_FIN_EXPENSE e
+                    INNER JOIN T_FIN_ACCOUNT oa ON e.ORIGIN_ACCOUNT_ID = oa.ID
+                    INNER JOIN T_FIN_EXPENSE_CATEGORY ec ON e.CATEGORY_ID = ec.ID
+                    WHERE 1=1
+                """);
 
         if (startDate != null) {
             sql.append(" AND TRUNC(e.\"DATE\") >= ?");
@@ -114,24 +151,24 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
     /**
      * Exclui uma despesa do banco de dados e atualiza o saldo da conta de origem,
      * adicionando o valor da despesa de volta à conta.
-     *
+     * <p>
      * Esta operação realiza as seguintes etapas de forma transacional:
      * <ul>
      *   <li>Recupera os dados da despesa (valor e conta de origem)</li>
      *   <li>Adiciona o valor ao saldo da conta de origem</li>
      *   <li>Remove o registro da despesa</li>
      * </ul>
-     *
+     * <p>
      * Caso qualquer etapa falhe, nenhuma modificação será persistida, garantindo a integridade
      * dos dados.
      *
      * @param id o identificador único da despesa a ser excluída
      * @throws DBException se a despesa não for encontrada ou ocorrer algum erro
-     *         durante o processo de exclusão e atualização do saldo
+     *                     durante o processo de exclusão e atualização do saldo
      */
     public void delete(Long id) throws DBException {
         String selectSql = "SELECT ORIGIN_ACCOUNT_ID, AMOUNT FROM T_FIN_EXPENSE WHERE ID = ?";
-        String updateAccountSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE + ? WHERE ID = ?";
+        String updateAccountSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE - ? WHERE ID = ?";
         String deleteSql = "DELETE FROM T_FIN_EXPENSE WHERE ID = ?";
 
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
@@ -172,7 +209,6 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
         }
     }
 
-
     public Expense fromResultSet(ResultSet rs) {
         try {
             return new Expense(
@@ -190,12 +226,12 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
                     ),
                     rs.getTimestamp("CREATED_AT").toLocalDateTime(),
                     new ExpenseCategory(
-                        rs.getLong("expense_category_id"),
-                        rs.getString("expense_category_name"),
-                        ExpenseCategoryType.valueOf(rs.getString("expense_category_type")),
-                        rs.getString("expense_category_color"),
-                        rs.getString("expense_category_icon"),
-                        rs.getTimestamp("expense_category_created_at").toLocalDateTime()
+                            rs.getLong("expense_category_id"),
+                            rs.getString("expense_category_name"),
+                            ExpenseCategoryType.valueOf(rs.getString("expense_category_type")),
+                            rs.getString("expense_category_color"),
+                            rs.getString("expense_category_icon"),
+                            rs.getTimestamp("expense_category_created_at").toLocalDateTime()
                     )
             );
         } catch (SQLException e) {

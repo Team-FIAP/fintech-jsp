@@ -84,13 +84,10 @@ public class IncomeServlet extends HttpServlet {
         }
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String acao = req.getParameter("action");
-        List<Account>accounts = getUserAccounts(getLoggedUser());
+//        List<Account>accounts = getUserAccounts(getLoggedUser());
 
         switch (acao) {
             case "cadastrar":
-
-
-                (req, resp);
                 break;
             case "editar":
                 editar(req, resp);
@@ -105,17 +102,17 @@ public class IncomeServlet extends HttpServlet {
     private void abrirFormCadastro(HttpServletRequest req, HttpServletResponse resp) {
     }
 
-    private void carregarContas(HttpServletRequest req){
-        List<String> lista = accountDao.findNames();
-        req.setAttribute("contas", lista);
-
-    }
+//    private void carregarContas(HttpServletRequest req){
+//////        List<String> lista = accountDao.findNames();
+////        req.setAttribute("contas", lista);
+////
+////    }
 
     private void editar(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Long id = Long.parseLong(req.getParameter("id-income"));
         Income income = incomeDao.findById(id);
         req.setAttribute("income", income);
-        carregarContas(req);
+//        carregarContas(req);
 
         req.getRequestDispatcher("editar-receita.jsp").forward(req, resp);
     }
