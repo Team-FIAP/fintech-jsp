@@ -50,9 +50,7 @@ public class ExpenseServlet extends HttpServlet {
             }
             case "editar" -> {
                 Long id = Long.parseLong(req.getParameter("id"));
-                System.out.println("Id recebido da aplicação: " + id);
                 Expense expense = expenseDao.findById(id);
-                System.out.println("Dados da expense: " + expense.getOriginAccount() + expense.getCategory() + expense.getDescription() + expense.getDate());
                 req.setAttribute("expense", expense);
                 req.getRequestDispatcher("formulario-despesa.jsp").forward(req, resp);
             }

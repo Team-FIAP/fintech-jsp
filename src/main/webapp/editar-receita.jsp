@@ -52,7 +52,6 @@
                                     </select>
                                 </div>
                             </div>
-                            <div></div>
                             <label class="mt-3 fw-bold" for="id-descricao">Descrição</label>
                             <div class="form-floating">
                                     <textarea class="form-control" placeholder="Descrição" id="id-descricao"
@@ -88,15 +87,14 @@
                                 <input type="text" name="observacoes" id="id-observacoes" class="form-control"
                                        value="${income.observation}">
                             </div>
-
                             <input type="submit" value="Salvar" class="btn btn-dark mt-3">
                         </form>
                     </div>
                 </div>
             </div>
+        </div>
     </main>
 </div>
-
 <jsp:include page="/includes/footer.jsp"/>
 
 <%-- Bootstrap JS --%>

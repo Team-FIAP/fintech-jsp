@@ -50,7 +50,6 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
         return null;
     }
 
-
     @Override
     public List<Expense> findAll() {
         return List.of();
