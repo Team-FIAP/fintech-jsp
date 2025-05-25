@@ -94,7 +94,6 @@
                         </div>
                     </form>
 
-
     </main>
 </div>
 <jsp:include page="/includes/footer.jsp"/>

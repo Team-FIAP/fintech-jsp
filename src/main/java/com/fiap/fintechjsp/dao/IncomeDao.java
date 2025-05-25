@@ -122,13 +122,53 @@ public class IncomeDao implements BaseDao<Income, Long> {
     }
 
     @Override
-    public Income insert(Income entity) throws DBException {
+    public Income insert(Income income) throws DBException {
+        String sql = """
+                    INSERT INTO T_FIN_INCOME (AMOUNT, "date", DESCRIPTION, OBSERVATION, ACCOUNT_ID) VALUES (?, ?, ?, ?, ?)
+                """;
+
+        try (Connection connection = ConnectionManager.getInstance().getConnection()) {
+            try (PreparedStatement stm = connection.prepareStatement(sql)) {
+                stm.setDouble(1, income.getAmount());
+                stm.setDate(2, java.sql.Date.valueOf(income.getDate()));
+                stm.setString(3, income.getDescription());
+                stm.setString(4, income.getObservation());
+                stm.setLong(5, income.getOriginAccount().getId());
+
+                stm.executeUpdate();
+
+                ResultSet rs = stm.getGeneratedKeys();
+                if (rs.next()) {
+                    long generatedId = rs.getLong(1);
+                    return findById(generatedId);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DBException(e);
+        }
         return null;
     }
 
     @Override
-    public Income update(Income entity) throws DBException {
-        return null;
+    public Income update(Income income) throws DBException {
+        String sql = """
+                        UPDATE T_FIN_INCOME SET AMOUNT = ?, "date" = ?, DESCRIPTION = ?, OBSERVATION = ? WHERE ID = ?
+                """;
+
+        try (Connection connection = ConnectionManager.getInstance().getConnection()) {
+            try (PreparedStatement stm = connection.prepareStatement(sql)) {
+                stm.setDouble(1, income.getAmount());
+                stm.setDate(2, java.sql.Date.valueOf(income.getDate()));
+                stm.setString(3, income.getDescription());
+                stm.setString(4, income.getObservation());
+                stm.setLong(5, income.getId());
+
+                stm.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DBException(e);
+        }
+        return findById(income.getId());
     }
 
     @Override

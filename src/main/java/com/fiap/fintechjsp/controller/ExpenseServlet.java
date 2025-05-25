@@ -75,11 +75,11 @@ public class ExpenseServlet extends HttpServlet {
         String expense = req.getParameter("id");
         String action = req.getParameter("action");
 
-        switch (action){
-            case "cadastrar" -> createExpense(req, resp);
-            case "editar" -> updateExpense(req, resp);
-
+        if (expense.equals("")) {
+            createExpense(req, resp);
+            return;
         }
+        updateExpense(req, resp);
     }
 
     private void createExpense(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -99,8 +99,6 @@ public class ExpenseServlet extends HttpServlet {
             req.setAttribute("error", "Erro ao cadastrar despesa" + e.getMessage());
             req.getRequestDispatcher("formulario-despesa.jsp").forward(req, resp);
         }
-
-
     }
 
     private void obterDadosExpense(HttpServletRequest req) {
@@ -126,7 +124,7 @@ public class ExpenseServlet extends HttpServlet {
             req.setAttribute("expense", expenseUpdate);
             req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
         } catch (DBException e) {
-            req.setAttribute("error", "Erro ao cadastrar despesa" + e.getMessage());
+            req.setAttribute("error", "Erro ao editar despesa" + e.getMessage());
             req.getRequestDispatcher("formulario-despesa.jsp").forward(req, resp);
         }
     }

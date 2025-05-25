@@ -22,6 +22,14 @@ public class IncomeServlet extends HttpServlet {
     private IncomeDao incomeDao;
     private AccountDao accountDao;
 
+    Long originAccountId;
+    double amount;
+    String description;
+    LocalDate data;
+    String observation;
+    LocalDateTime createdAt = LocalDateTime.now();
+
+
     public void init() throws ServletException {
         incomeDao = new IncomeDao();
         accountDao = new AccountDao();
@@ -51,7 +59,59 @@ public class IncomeServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
+        String income = req.getParameter("id");
+
+        if (income.equals("")) {
+            createIncome(req, resp);
+            return;
+        }
+        updateIncome(req, resp);
+    }
+
+    private void createIncome(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            obterDadosIncome(req);
+
+
+            Account account = accountDao.findById(originAccountId);
+
+            Income income = new Income(0L, amount, data, description, observation, account, createdAt);
+            incomeDao.insert(income);
+            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+
+        } catch (DBException e) {
+            req.setAttribute("error", "Erro ao cadastrar despesa" + e.getMessage());
+            req.getRequestDispatcher("formulario-receita.jsp").forward(req, resp);
+        }
+    }
+
+    private void updateIncome(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+
+            Long incomeId = Long.parseLong(req.getParameter("id"));
+            Income income = incomeDao.findById(incomeId);
+            obterDadosIncome(req);
+            Account account = accountDao.findById(originAccountId);
+
+            Income incomeModify = new Income(income.getId(), amount, data, description, observation, account, createdAt);
+
+            Income incomeUpdate = incomeDao.update(incomeModify);
+            req.setAttribute("income", incomeUpdate);
+            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+
+        } catch (
+                DBException e) {
+            req.setAttribute("error", "Erro ao editar receita" + e.getMessage());
+            req.getRequestDispatcher("formulario-despesa.jsp").forward(req, resp);
+        }
+    }
+
+    private void obterDadosIncome(HttpServletRequest req) {
+        originAccountId = Long.parseLong(req.getParameter("originAccountId"));
+        amount = Double.parseDouble(req.getParameter("amount"));
+        description = req.getParameter("description");
+        data = LocalDate.parse(req.getParameter("data"));
+        observation = req.getParameter("observation");
     }
 }
 
