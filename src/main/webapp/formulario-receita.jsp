@@ -58,7 +58,7 @@
                                     min="0.01"
                                     step="0.01"
                                     inputmode="decimal"
-                                    value="${income.amount}"
+                                    value="${income.amount}" required
                             >
                                 <div class="invalid-feedback">
                                     Por favor, insira um valor monetário positivo (Ex: 123.45).
