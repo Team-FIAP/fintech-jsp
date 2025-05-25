@@ -29,12 +29,15 @@
             <div class="mt-5 ms-5 me-5">
                 <h1 class="mb-3 text-center">${expense != null ? "Editar Despesa" : "Cadastrar Despesa"}</h1>
                 <div class="card mb-3 p-3">
-                    <form class="needs-validation" novalidate action="/despesas" method="post">
+                    <c:if test="${not empty error}">
+                    <div class="alert alert-danger ms-2 me-2 m-auto">${error}</div>
+                    </c:if>
+                    <form class="needs-validation" novalidate action="/despesas" id="postForm" method="post">
                         <input type="hidden" name="id" value="${expense.id}">
                         <div class="form-group">
                             <label for="originAccountId" class="form-label fw-bold mt-3">Conta</label>
                             <select class="form-select" id="originAccountId" name="originAccountId" required>
-                                <option value="0" disabled selected>Selecione uma conta</option>
+                                <option value=""></option>
                                 <c:forEach var="account" items="${accounts}">
 
                                     <option value="${account.id}"
@@ -49,7 +52,7 @@
                         <div class="form-group">
                             <label for="expenseCategory" class="form-label fw-bold mt-3">Categoria</label>
                             <select class="form-select" id="expenseCategory" name="expenseCategory" required>
-                                <option value="0" disabled selected>Selecione uma categoria</option>
+                                <option value=""></option>
                                 <c:forEach var="expenseCategory" items="${expenseCategories}">
                                     <option value="${expenseCategory.id}"
                                             <c:if test="${expense.category.id == expenseCategory.id}">selected</c:if>>${expenseCategory.name}</option>
@@ -60,21 +63,43 @@
                             </div>
                         </div>
 
-                        <label for="descricao" value="${expense.description}" class="fw-bold mt-3">Descrição</label>
+                        <div class=" form-group mt-3">
+                            <label class="fw-bold" for="id-amount" id="id-amount">Valor*</label>
+                            <div class="input-group"><span class="input-group-text">R$</span> <input
+                                    type="number"
+                                    name="amount"
+                                    id="amount"
+                                    class="form-control"
+                                    min="0.01"
+                                    step="0.01"
+                                    inputmode="decimal"
+                                    value="${expense.amount}"
+                            >
+                                <div class="invalid-feedback">
+                                    Por favor, insira um valor monetário positivo (Ex: 123.45).
+                                </div>
+                            </div>
+                        </div>
+
+                        <label for="description" value="${expense.description}" id="id-description" class="fw-bold mt-3">Descrição</label>
                         <div class="form-floating mt-2">
-                            <textarea class="form-control" placeholder="Descrição" id="id-descricao"
+                            <textarea class="form-control" placeholder="Descrição" id="description" name="description"
                                       style="height: 100px" maxlength="255">${expense.description}</textarea>
                         </div>
 
                         <div class="form-group mt-3">
                             <label class="fw-bold" for="id-data">Data*</label>
-                            <input type="date" name="data" id="id-data" class="form-control" value="${expense.date}"
+                            <input type="date" name="data" id="data" class="form-control" value="${expense.date}"
                                    required>
+
+                            <div class="invalid-feedback">
+                                Por favor, informe a data da despesa.
+                            </div>
                         </div>
 
                         <div class="form-group mt-3">
-                            <label class="fw-bold" for="id-observacoes">Observações</label>
-                            <input type="text" name="observacoes" id="id-observacoes" class="form-control"
+                            <label class="fw-bold" for="id-observa" id="observation">Observações</label>
+                            <input type="text" name="observation" id="observation" class="form-control"
                                    value="${expense.observation}">
                         </div>
 

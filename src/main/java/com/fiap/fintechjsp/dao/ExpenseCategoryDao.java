@@ -1,6 +1,7 @@
 package com.fiap.fintechjsp.dao;
 
 import com.fiap.fintechjsp.exception.DBException;
+import com.fiap.fintechjsp.exception.EntityNotFoundException;
 import com.fiap.fintechjsp.model.Account;
 import com.fiap.fintechjsp.model.ExpenseCategory;
 import com.fiap.fintechjsp.model.ExpenseCategoryType;
@@ -16,9 +17,23 @@ import java.util.List;
 public class ExpenseCategoryDao implements BaseDao<ExpenseCategory, Long> {
 
     @Override
-    public ExpenseCategory findById(Long aLong) {
-        return null;
+    public ExpenseCategory findById(Long id) {
+        String sql = "SELECT * FROM T_FIN_EXPENSE_CATEGORY WHERE ID = ?";
+
+        try (Connection connection = ConnectionManager.getInstance().getConnection()) {
+        try (PreparedStatement stm = connection.prepareStatement(sql)) {
+            stm.setLong(1, id);
+            ResultSet result = stm.executeQuery();
+            if (!result.next()) {
+                throw new EntityNotFoundException(id);
+            }
+            return fromResultSet(result);
+
+        }
+    } catch (SQLException e) {
+        throw new DBException(e);
     }
+}
 
     @Override
     public List<ExpenseCategory> findAll() {
