@@ -73,12 +73,13 @@ public class ExpenseServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User loggedUser = AuthUtils.getUserFromSession(req);
         String expense = req.getParameter("id");
+        String action = req.getParameter("action");
 
-        if (expense.equals("")) {
-            createExpense(req, resp);
-            return;
+        switch (action){
+            case "cadastrar" -> createExpense(req, resp);
+            case "editar" -> updateExpense(req, resp);
+
         }
-        updateExpense(req, resp);
     }
 
     private void createExpense(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

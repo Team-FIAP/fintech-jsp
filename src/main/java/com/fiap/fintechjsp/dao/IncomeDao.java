@@ -11,7 +11,37 @@ import java.util.List;
 
 public class IncomeDao implements BaseDao<Income, Long> {
     @Override
-    public Income findById(Long aLong) {
+    public Income findById(Long id) {
+        StringBuilder sql = new StringBuilder("""
+                    SELECT 
+                        i.ID,
+                        i.DESCRIPTION,
+                        i.OBSERVATION,
+                        i.AMOUNT,
+                        i."date",
+                        i.CREATED_AT,
+                        oa.ID origin_account_id,
+                        oa.NAME origin_account_name,
+                        oa.BALANCE origin_account_balance,
+                        oa.CREATED_AT origin_account_created_at
+                    FROM T_FIN_INCOME i
+                    INNER JOIN T_FIN_ACCOUNT oa
+                    ON i.ACCOUNT_ID = oa.ID
+                    WHERE i.ID = ?
+                """);
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return fromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -23,22 +53,22 @@ public class IncomeDao implements BaseDao<Income, Long> {
     public List<Income> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId) {
         List<Income> incomes = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
-            SELECT 
-                i.ID,
-                i.DESCRIPTION,
-                i.OBSERVATION,
-                i.AMOUNT,
-                i."DATE",
-                i.CREATED_AT,
-                oa.ID origin_account_id,
-                oa.NAME origin_account_name,
-                oa.BALANCE origin_account_balance,
-                oa.CREATED_AT origin_account_created_at
-            FROM T_FIN_INCOME i
-            INNER JOIN T_FIN_ACCOUNT oa
-            ON i.ORIGIN_ACCOUNT_ID = oa.ID
-            WHERE 1=1
-        """);
+                    SELECT 
+                        i.ID,
+                        i.DESCRIPTION,
+                        i.OBSERVATION,
+                        i.AMOUNT,
+                        i."DATE",
+                        i.CREATED_AT,
+                        oa.ID origin_account_id,
+                        oa.NAME origin_account_name,
+                        oa.BALANCE origin_account_balance,
+                        oa.CREATED_AT origin_account_created_at
+                    FROM T_FIN_INCOME i
+                    INNER JOIN T_FIN_ACCOUNT oa
+                    ON i.ORIGIN_ACCOUNT_ID = oa.ID
+                    WHERE 1=1
+                """);
 
         if (startDate != null) {
             sql.append(" AND TRUNC(i.\"DATE\") >= ?");
@@ -109,20 +139,20 @@ public class IncomeDao implements BaseDao<Income, Long> {
     /**
      * Exclui uma receita (income) do banco de dados e atualiza o saldo da conta de origem,
      * subtraindo o valor da receita excluída.
-     *
+     * <p>
      * Esta operação realiza as seguintes etapas de forma transacional:
      * <ul>
      *   <li>Recupera os dados da receita (valor e conta de origem)</li>
      *   <li>Subtrai o valor do saldo da conta de origem</li>
      *   <li>Remove o registro da receita</li>
      * </ul>
-     *
+     * <p>
      * Caso qualquer etapa falhe, nenhuma modificação será persistida, garantindo a integridade
      * dos dados.
      *
      * @param id o identificador único da receita a ser excluída
      * @throws DBException se a receita não for encontrada ou ocorrer algum erro
-     *         durante o processo de exclusão e atualização do saldo
+     *                     durante o processo de exclusão e atualização do saldo
      */
     public void delete(Long id) throws DBException {
         String selectSql = "SELECT ORIGIN_ACCOUNT_ID, AMOUNT FROM T_FIN_INCOME WHERE ID = ?";
@@ -170,19 +200,19 @@ public class IncomeDao implements BaseDao<Income, Long> {
     public Income fromResultSet(ResultSet rs) {
         try {
             return new Income(
-                rs.getLong("ID"),
-                rs.getDouble("AMOUNT"),
-                rs.getDate("DATE").toLocalDate(),
-                rs.getString("DESCRIPTION"),
-                rs.getString("OBSERVATION"),
-                new Account(
-                        rs.getLong("origin_account_id"),
-                        rs.getString("origin_account_name"),
-                        rs.getDouble("origin_account_balance"),
-                        null,
-                        rs.getTimestamp("origin_account_created_at").toLocalDateTime()
-                ),
-                rs.getTimestamp("CREATED_AT").toLocalDateTime()
+                    rs.getLong("ID"),
+                    rs.getDouble("AMOUNT"),
+                    rs.getDate("DATE").toLocalDate(),
+                    rs.getString("DESCRIPTION"),
+                    rs.getString("OBSERVATION"),
+                    new Account(
+                            rs.getLong("origin_account_id"),
+                            rs.getString("origin_account_name"),
+                            rs.getDouble("origin_account_balance"),
+                            null,
+                            rs.getTimestamp("origin_account_created_at").toLocalDateTime()
+                    ),
+                    rs.getTimestamp("CREATED_AT").toLocalDateTime()
             );
         } catch (SQLException e) {
             e.printStackTrace();

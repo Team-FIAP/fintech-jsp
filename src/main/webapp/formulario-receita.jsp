@@ -9,7 +9,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <html>
 <head>
-    <title>${expense != null ? "Editar Despesa" : "Cadastrar Despesa"}</title>
+    <title>${expense != null ? "Editar Receita" : "Cadastrar Receita"}</title>
     <meta charset="UTF-8">
 
     <%-- Bootstrap Icons --%>
@@ -27,13 +27,13 @@
     <main class="layout">
         <div class="container">
             <div class="mt-5 ms-5 me-5">
-                <h1 class="mb-3 text-center">${expense != null ? "Editar Despesa" : "Cadastrar Despesa"}</h1>
+                <h1 class="mb-3 text-center">${income != null ? "Editar Receita" : "Cadastrar Receita"}</h1>
                 <div class="card mb-3 p-3">
                     <c:if test="${not empty error}">
                     <div class="alert alert-danger ms-2 me-2 m-auto">${error}</div>
                     </c:if>
-                    <form class="needs-validation" novalidate action="/despesas" id="postForm" method="post">
-                        <input type="hidden" name="id" value="${expense.id}">
+                    <form class="needs-validation" novalidate action="/receitas" id="postForm" method="post">
+                        <input type="hidden" name="id" value="${income.id}">
                         <div class="form-group">
                             <label for="originAccountId" class="form-label fw-bold mt-3">Conta</label>
                             <select class="form-select" id="originAccountId" name="originAccountId" required>
@@ -41,28 +41,13 @@
                                 <c:forEach var="account" items="${accounts}">
 
                                     <option value="${account.id}"
-                                            <c:if test="${expense.originAccount.id == account.id}">selected</c:if>>${account.name}</option>
+                                            <c:if test="${income.originAccount.id == account.id}">selected</c:if>>${account.name}</option>
                                 </c:forEach>
                             </select>
                             <div class="invalid-feedback">
                                 Por favor, informe uma conta.
                             </div>
                         </div>
-
-                        <div class="form-group">
-                            <label for="expenseCategory" class="form-label fw-bold mt-3">Categoria</label>
-                            <select class="form-select" id="expenseCategory" name="expenseCategory" required>
-                                <option value=""></option>
-                                <c:forEach var="expenseCategory" items="${expenseCategories}">
-                                    <option value="${expenseCategory.id}"
-                                            <c:if test="${expense.category.id == expenseCategory.id}">selected</c:if>>${expenseCategory.name}</option>
-                                </c:forEach>
-                            </select>
-                            <div class="invalid-feedback">
-                                Por favor, informe uma categoria.
-                            </div>
-                        </div>
-
                         <div class=" form-group mt-3">
                             <label class="fw-bold" for="id-amount" id="id-amount">Valor*</label>
                             <div class="input-group"><span class="input-group-text">R$</span> <input
@@ -73,7 +58,7 @@
                                     min="0.01"
                                     step="0.01"
                                     inputmode="decimal"
-                                    value="${expense.amount}"
+                                    value="${income.amount}"
                             >
                                 <div class="invalid-feedback">
                                     Por favor, insira um valor monetário positivo (Ex: 123.45).
@@ -81,15 +66,15 @@
                             </div>
                         </div>
 
-                        <label for="description" value="${expense.description}" id="id-description" class="fw-bold mt-3">Descrição</label>
+                        <label for="description" value="${income.description}" id="id-description" class="fw-bold mt-3">Descrição</label>
                         <div class="form-floating mt-2">
                             <textarea class="form-control" placeholder="Descrição" id="description" name="description"
-                                      style="height: 100px" maxlength="255">${expense.description}</textarea>
+                                      style="height: 100px" maxlength="255">${income.description}</textarea>
                         </div>
 
                         <div class="form-group mt-3">
                             <label class="fw-bold" for="id-data">Data*</label>
-                            <input type="date" name="data" id="data" class="form-control" value="${expense.date}"
+                            <input type="date" name="data" id="data" class="form-control" value="${income.date}"
                                    required>
 
                             <div class="invalid-feedback">
@@ -100,7 +85,7 @@
                         <div class="form-group mt-3">
                             <label class="fw-bold" for="id-observa" id="observation">Observações</label>
                             <input type="text" name="observation" id="observation" class="form-control"
-                                   value="${expense.observation}">
+                                   value="${income.observation}">
                         </div>
 
                         <div class="col-md-12">
@@ -108,6 +93,8 @@
                             <a href="transacoes-financeiras" class="btn btn-light mt-3 ms-2">Cancelar</a>
                         </div>
                     </form>
+
+
     </main>
 </div>
 <jsp:include page="/includes/footer.jsp"/>
