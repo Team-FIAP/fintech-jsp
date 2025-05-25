@@ -4,6 +4,7 @@ import com.fiap.fintechjsp.exception.DBException;
 import com.fiap.fintechjsp.model.Account;
 import com.fiap.fintechjsp.model.Income;
 import com.fiap.fintechjsp.model.Investment;
+import com.fiap.fintechjsp.model.InvestmentType;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -21,7 +22,19 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
         return List.of();
     }
 
-    public List<Investment> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId) {
+    /**
+     * Recupera todos os investimentos registrados no banco de dados, com base nos filtros fornecidos:
+     * intervalo de datas, conta de origem e usuário proprietário da conta.
+     *
+     * <p>Os investimentos são retornados ordenados pela data da operação em ordem decrescente.</p>
+     *
+     * @param startDate data inicial do intervalo de busca (inclusive); se {@code null}, não aplica filtro inicial
+     * @param endDate data final do intervalo de busca (inclusive); se {@code null}, não aplica filtro final
+     * @param accountId ID da conta de origem do investimento; se {@code null}, busca em todas as contas
+     * @param userId ID do usuário dono da conta; se {@code null}, busca investimentos de todos os usuários
+     * @return lista de objetos {@link Investment} que correspondem aos critérios informados; lista vazia se nenhum for encontrado
+     */
+    public List<Investment> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId, boolean redeemed) {
         List<Investment> investments = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
             SELECT 
@@ -64,6 +77,8 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
             sql.append(" AND oa.USER_ID = ?");
         }
 
+        sql.append(" AND i.REDEEMED = ?");
+
         sql.append(" ORDER BY i.\"DATE\" DESC");
 
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
@@ -84,8 +99,10 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
             }
 
             if (userId != null) {
-                ps.setLong(index, userId);
+                ps.setLong(index++, userId);
             }
+
+            ps.setBoolean(index, redeemed);
 
             ResultSet rs = ps.executeQuery();
 
@@ -191,7 +208,7 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
                         rs.getTimestamp("origin_account_created_at").toLocalDateTime()
                 ),
                 rs.getTimestamp("CREATED_AT").toLocalDateTime(),
-                rs.getString("TYPE"),
+                InvestmentType.valueOf(rs.getString("TYPE")),
                 rs.getString("RISK"),
                 rs.getString("LIQUIDITY"),
                 rs.getDouble("PROFITABILITY"),

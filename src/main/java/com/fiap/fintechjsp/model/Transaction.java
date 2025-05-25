@@ -64,7 +64,7 @@ public abstract class Transaction {
         this.observation = observation;
     }
 
-    public TransactionType getType() {
+    public TransactionType getTransactionType() {
         return type;
     }
 

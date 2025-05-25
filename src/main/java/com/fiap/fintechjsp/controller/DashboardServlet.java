@@ -2,7 +2,9 @@ package com.fiap.fintechjsp.controller;
 
 import com.fiap.fintechjsp.dao.ExpenseDao;
 import com.fiap.fintechjsp.dao.IncomeDao;
+import com.fiap.fintechjsp.dao.InvestmentDao;
 import com.fiap.fintechjsp.dao.UserDao;
+import com.fiap.fintechjsp.model.Investment;
 import com.fiap.fintechjsp.model.User;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -21,6 +23,7 @@ public class DashboardServlet extends HttpServlet {
     private UserDao userDao;
     private ExpenseDao expenseDao;
     private IncomeDao incomeDao;
+    private InvestmentDao investmentDao;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -28,6 +31,7 @@ public class DashboardServlet extends HttpServlet {
         this.userDao = new UserDao();
         this.expenseDao = new ExpenseDao();
         this.incomeDao = new IncomeDao();
+        this.investmentDao = new InvestmentDao();
     }
 
     @Override
@@ -60,8 +64,9 @@ public class DashboardServlet extends HttpServlet {
         // Obtendo o total de despesas
         double totalExpenses = expenseDao.getTotalExpensesForUserByPeriod(loggedUser, startDate, endDate);
 
-        // TODO: Obtendo o total acumulado dos investimentos
-        double totalAccumulatedInvestments = 0;
+        List<Investment> investments = investmentDao.findAll(startDate, null, null, loggedUser.getId(), false);
+        double totalGrossInvestments = investments.stream().mapToDouble(Investment::getGrossValue).sum();
+        double totalAccumulatedInvestments = investments.stream().mapToDouble(Investment::getAccumulatedEarnings).sum();
 
         // Receitas por categoria
         List<Map<String, Object>> expensesByCategory = expenseDao.getTotalExpensesByCategoryForUserInPeriod(loggedUser, startDate, endDate);
@@ -81,6 +86,7 @@ public class DashboardServlet extends HttpServlet {
         req.setAttribute("totalBalance", totalBalance);
         req.setAttribute("totalIncomes", totalIncomes);
         req.setAttribute("totalExpenses", totalExpenses);
+        req.setAttribute("totalGrossInvestments", totalGrossInvestments);
         req.setAttribute("totalAccumulatedInvestments", totalAccumulatedInvestments);
         req.setAttribute("expensesByCategory", expensesByCategory);
         req.setAttribute("expensesTypeComparison", expensesTypeComparison);

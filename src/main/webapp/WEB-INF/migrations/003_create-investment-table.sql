@@ -10,7 +10,7 @@ CREATE TABLE T_FIN_INVESTMENT(
     due_date DATE,
     profitability NUMBER(10, 2),
     origin_account_id NUMBER NOT NULL,
-    investment_rate NUMBER(10, 2) NOT NULL,
+    interest_rate NUMBER(10, 2) NOT NULL,
     redeemed BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  NOT NULL,
 

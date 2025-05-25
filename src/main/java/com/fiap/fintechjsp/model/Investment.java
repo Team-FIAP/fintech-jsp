@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Investment extends Transaction {
-    private String investmentType;
+    private InvestmentType investmentType;
     private String risk;
     private String liquidity;
     private double profitability;
@@ -12,7 +12,7 @@ public class Investment extends Transaction {
     private double interestRate;
     private boolean redeemed;
 
-    public Investment(Long id, double amount, LocalDate date, String description, String observation, Account originAccount, LocalDateTime createdAt, String investmentType, String risk, String liquidity, double profitability, LocalDate dueDate, double interestRate, boolean redeemed) {
+    public Investment(Long id, double amount, LocalDate date, String description, String observation, Account originAccount, LocalDateTime createdAt, InvestmentType investmentType, String risk, String liquidity, double profitability, LocalDate dueDate, double interestRate, boolean redeemed) {
         super(id, amount, date, description, observation, TransactionType.INVESTMENT, originAccount, createdAt);
         this.investmentType = investmentType;
         this.risk = risk;
@@ -21,6 +21,18 @@ public class Investment extends Transaction {
         this.dueDate = dueDate;
         this.interestRate = interestRate;
         this.redeemed = redeemed;
+    }
+
+    public double getGrossValue() {
+        return calculateValueAt(LocalDate.now());
+    }
+
+    public double getAccumulatedEarnings() {
+        return getGrossValue() - getAmount();
+    }
+
+    public double calculateValueAt(LocalDate date) {
+        return investmentType.getCalculator().calculateGrossValueAt(this, date);
     }
 
     public double getInterestRate() {
@@ -39,11 +51,11 @@ public class Investment extends Transaction {
         this.redeemed = redeemed;
     }
 
-    public String getInvestmentType() {
+    public InvestmentType getInvestmentType() {
         return investmentType;
     }
 
-    public void setInvestmentType(String investmentType) {
+    public void setInvestmentType(InvestmentType investmentType) {
         this.investmentType = investmentType;
     }
 

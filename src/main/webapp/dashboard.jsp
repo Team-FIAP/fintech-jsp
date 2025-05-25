@@ -58,8 +58,7 @@
                 <div class="card text-bg-warning">
                     <div class="card-body">
                         <h5 class="card-title">Investimentos</h5>
-                        <p class="card-text fs-2">R$ <fmt:formatNumber pattern="0.00"
-                                                                       value="${totalAccumulatedInvestments}"/></p>
+                        <p class="card-text fs-2">R$ <fmt:formatNumber pattern="0.00" value="${totalGrossInvestments}"/></p>
                         <small class="text-black-50">Valores acumulados</small>
                     </div>
                 </div>
@@ -103,7 +102,7 @@
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <canvas id="incomeExpenseChart" style="max-height: 225px;"></canvas>
+                                <canvas id="incomeExpenseChart" class="h-100 w-100"></canvas>
                             </c:otherwise>
                         </c:choose>
                     </div>
@@ -119,7 +118,7 @@
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <canvas id="expensesByCategoryTypeChart" style="max-height: 225px;"></canvas>
+                                <canvas id="expensesByCategoryTypeChart" class="h-100 w-100"></canvas>
                             </c:otherwise>
                         </c:choose>
                     </div>
