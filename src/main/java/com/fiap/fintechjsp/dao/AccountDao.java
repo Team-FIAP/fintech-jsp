@@ -158,6 +158,21 @@ public class AccountDao implements BaseDao<Account, Long> {
         }
     }
 
+    public boolean existsByName(String name) {
+        String sql = "SELECT * FROM T_FIN_ACCOUNT WHERE UPPER(NAME) = UPPER(?)";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ResultSet resultSet = ps.executeQuery();
+            return resultSet.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Account fromResultSet(ResultSet rs) {
         try {
             return new Account(
@@ -179,20 +194,5 @@ public class AccountDao implements BaseDao<Account, Long> {
         }
 
         return null;
-    }
-
-    public boolean existsByName(String name) {
-        String sql = "SELECT * FROM T_FIN_ACCOUNT WHERE UPPER(NAME) = UPPER(?)";
-
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, name);
-                ResultSet resultSet = ps.executeQuery();
-                return resultSet.next();
-
-            } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 }
