@@ -23,6 +23,11 @@ public class User {
         this.cpf = cpf;
     }
 
+    public User(Long id, String name, String email, String password, String cpf) {
+        this(name, email, password, cpf);
+        this.id = id;
+    }
+
     public User() {
     }
 

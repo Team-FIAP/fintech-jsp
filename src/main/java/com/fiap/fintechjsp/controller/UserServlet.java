@@ -95,7 +95,7 @@ public class UserServlet extends HttpServlet {
             // Hash da senha
             String hashedPassword = AuthUtils.hashPassword(password);
 
-            // Criação do usuário e persistência
+            // Criação do usuário e persistência/listar-contas
             User user = new User(name, username, hashedPassword, cpf);
             userDao.insert(user);
 
