@@ -126,8 +126,8 @@ public class IncomeDao implements BaseDao<Income, Long> {
     @Override
     public Income insert(Income income) throws DBException {
         String sql = """
-                    INSERT INTO T_FIN_INCOME (AMOUNT, "date", DESCRIPTION, OBSERVATION, ACCOUNT_ID) VALUES (?, ?, ?, ?, ?)
-                """;
+            INSERT INTO T_FIN_INCOME (AMOUNT, "DATE", DESCRIPTION, OBSERVATION, ORIGIN_ACCOUNT_ID) VALUES (?, ?, ?, ?, ?)
+        """;
 
         try (Connection connection = ConnectionManager.getInstance().getConnection()) {
             try (PreparedStatement stm = connection.prepareStatement(sql)) {
@@ -154,8 +154,8 @@ public class IncomeDao implements BaseDao<Income, Long> {
     @Override
     public Income update(Income income) throws DBException {
         String sql = """
-                        UPDATE T_FIN_INCOME SET AMOUNT = ?, "date" = ?, DESCRIPTION = ?, OBSERVATION = ? WHERE ID = ?
-                """;
+            UPDATE T_FIN_INCOME SET AMOUNT = ?, "date" = ?, DESCRIPTION = ?, OBSERVATION = ? WHERE ID = ?
+        """;
 
         try (Connection connection = ConnectionManager.getInstance().getConnection()) {
             try (PreparedStatement stm = connection.prepareStatement(sql)) {

@@ -107,6 +107,19 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
         return investments;
     }
 
+    /**
+     * Recupera todos os investimentos registrados no banco de dados, com base nos filtros fornecidos:
+     * intervalo de datas, conta de origem e usuário proprietário da conta.
+     *
+     * <p>Os investimentos são retornados ordenados pela data da operação em ordem decrescente.</p>
+     *
+     * @param startDate data inicial do intervalo de busca (inclusive); se {@code null}, não aplica filtro inicial
+     * @param endDate data final do intervalo de busca (inclusive); se {@code null}, não aplica filtro final
+     * @param accountId ID da conta de origem do investimento; se {@code null}, busca em todas as contas
+     * @param userId ID do usuário dono da conta; se {@code null}, busca investimentos de todos os usuários
+     * @param redeemed indica se o investimento já foi resgatado ou não
+     * @return lista de objetos {@link Investment} que correspondem aos critérios informados; lista vazia se nenhum for encontrado
+     */
     public List<Investment> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId, boolean redeemed) {
         List<Investment> investments = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
@@ -121,6 +134,8 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
                 i.LIQUIDITY,
                 i.PROFITABILITY,
                 i.DUE_DATE,
+                i.INTEREST_RATE,
+                i.REDEEMED,
                 i.CREATED_AT,
                 oa.id origin_account_id,
                 oa.name origin_account_name,

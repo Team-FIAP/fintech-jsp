@@ -23,13 +23,13 @@
         </a>
       </li>
       <li>
-        <a href="" class="nav-link text-white py-3 border-0 rounded-0 hover-dark <%= currentUri.contains("investimentos.jsp") ? "active bg-dark" : "" %>" title="Investimentos" data-bs-toggle="tooltip">
+        <a href="investimentos" class="nav-link text-white py-3 border-0 rounded-0 hover-dark <%= currentUri.contains("investimentos.jsp") ? "active bg-dark" : "" %>" title="Investimentos" data-bs-toggle="tooltip">
           <i class="bi bi-bar-chart-line fs-5"></i>
           <span class="d-none ms-2">Investimentos</span>
         </a>
       </li>
       <li>
-        <a href="" class="nav-link text-white py-3 border-0 rounded-0 hover-dark <%= currentUri.contains("contas.jsp") ? "active bg-dark" : "" %>" title="Contas" data-bs-toggle="tooltip">
+        <a href="contas" class="nav-link text-white py-3 border-0 rounded-0 hover-dark <%= currentUri.contains("contas.jsp") ? "active bg-dark" : "" %>" title="Contas" data-bs-toggle="tooltip">
           <i class="bi bi-bank fs-5"></i>
           <span class="d-none ms-2">Contas</span>
         </a>

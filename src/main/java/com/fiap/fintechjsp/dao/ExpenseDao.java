@@ -4,9 +4,9 @@ import com.fiap.fintechjsp.exception.DBException;
 import com.fiap.fintechjsp.model.*;
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ExpenseDao implements BaseDao<Expense, Long> {
     @Override
@@ -64,7 +64,7 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
                         e.DESCRIPTION,
                         e.OBSERVATION,
                         e.AMOUNT,
-                        e.DATE,
+                        e."DATE",
                         e.CREATED_AT,
                         oa.ID origin_account_id,
                         oa.NAME origin_account_name,
@@ -136,7 +136,7 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
     @Override
     public Expense insert(Expense expense) throws DBException {
         String sql = """
-                    INSERT INTO T_FIN_EXPENSE (AMOUNT, "date", DESCRIPTION, OBSERVATION, ACCOUNT_ID, CATEGORY_ID) 
+                    INSERT INTO T_FIN_EXPENSE (AMOUNT, "DATE", DESCRIPTION, OBSERVATION, ORIGIN_ACCOUNT_ID, CATEGORY_ID) 
                     VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
@@ -166,7 +166,7 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
     @Override
     public Expense update(Expense expense) throws DBException {
         String sql = """
-                    UPDATE T_FIN_EXPENSE SET AMOUNT = ?, "date" = ?, DESCRIPTION = ?, OBSERVATION = ?, ACCOUNT_ID = ?, CATEGORY_ID = ?
+                    UPDATE T_FIN_EXPENSE SET AMOUNT = ?, "DATE" = ?, DESCRIPTION = ?, OBSERVATION = ?, ORIGIN_ACCOUNT_ID = ?, CATEGORY_ID = ?
                     WHERE ID = ?
                 """;
         try (Connection connection = ConnectionManager.getInstance().getConnection()) {
@@ -289,21 +289,21 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
     }
 
     /**
-     * Retorna o total de despesas de um usuário dentro de um período específico.
+     * Retorna o total de despesas de um usuário em um determinado período.
      *
-     * @param user O usuário cujas despesas devem ser somadas.
-     * @param startDate  A data inicial do período (inclusive).
-     * @param endDate    A data final do período (inclusive).
-     * @return O valor total das despesas no período informado. Retorna 0.0 se não houver despesas ou em caso de erro.
+     * @param user O usuário cujas despesas serão consultadas.
+     * @param startDate A data inicial do período.
+     * @param endDate A data final do período.
+     * @return O valor total das despesas no intervalo especificado. Retorna 0.0 se não houver despesas ou em caso de erro.
      */
     public double getTotalExpensesForUserByPeriod(User user, LocalDate startDate, LocalDate endDate) {
         String sql = """
-                    SELECT SUM(i.AMOUNT)
-                    FROM T_FIN_EXPENSE i
-                    INNER JOIN T_FIN_ACCOUNT a ON i.ORIGIN_ACCOUNT_ID = a.ID
-                    WHERE a.USER_ID = ?
-                    AND i."DATE" BETWEEN ? AND ?
-                """;
+            SELECT SUM(e.AMOUNT)
+            FROM T_FIN_EXPENSE e
+            INNER JOIN T_FIN_ACCOUNT a ON e.ORIGIN_ACCOUNT_ID = a.ID 
+            WHERE a.USER_ID = ?
+            AND e."DATE" BETWEEN ? AND ?
+        """;
 
         try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -315,7 +315,7 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return rs.getDouble(1); // índice começa em 1
+                return rs.getDouble(1);
             }
 
         } catch (Exception e) {
@@ -323,5 +323,116 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
         }
 
         return 0.0;
+    }
+
+    public List<Map<String, Object>> getTotalExpensesByCategoryForUserInPeriod(User loggedUser, LocalDate startDate, LocalDate endDate) {
+        List<Map<String, Object>> expensesByCategory = new ArrayList<>();
+        String sql = """
+            SELECT ec.NAME category, ec.COLOR color, SUM(e.AMOUNT) total
+            FROM T_FIN_EXPENSE e
+            INNER JOIN T_FIN_EXPENSE_CATEGORY ec ON e.CATEGORY_ID = ec.ID
+            INNER JOIN T_FIN_ACCOUNT a ON e.ORIGIN_ACCOUNT_ID = a.ID
+            WHERE a.USER_ID = ?
+            AND e."DATE" BETWEEN ? AND ?
+            GROUP BY ec.NAME, ec.COLOR
+        """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setLong(1, loggedUser.getId());
+            ps.setDate(2, java.sql.Date.valueOf(startDate));
+            ps.setDate(3, java.sql.Date.valueOf(endDate));
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("category", rs.getString("category"));
+                item.put("total", rs.getDouble("total"));
+                item.put("color", rs.getString("color"));
+
+                expensesByCategory.add(item);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return expensesByCategory;
+    }
+
+    public Map<String, Double> getTotalExpensesByCategoryTypeForUserInPeriod(User loggedUser, LocalDate startDate, LocalDate endDate) {
+        Map<String, Double> expensesByCategoryType = new HashMap<>();
+
+        String sql = """
+            SELECT ec.TYPE category_type, SUM(e.AMOUNT) total
+            FROM T_FIN_EXPENSE e
+            INNER JOIN T_FIN_EXPENSE_CATEGORY ec ON e.CATEGORY_ID = ec.ID
+            INNER JOIN T_FIN_ACCOUNT a ON e.ORIGIN_ACCOUNT_ID = a.ID
+            WHERE a.USER_ID = ?
+            AND e."DATE" BETWEEN ? AND ?
+            GROUP BY ec.TYPE
+        """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setLong(1, loggedUser.getId());
+            ps.setDate(2, java.sql.Date.valueOf(startDate));
+            ps.setDate(3, java.sql.Date.valueOf(endDate));
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                expensesByCategoryType.put(rs.getString("category_type"), rs.getDouble("total"));
+            }
+
+            // Garante que ambas as chaves estejam presentes
+            expensesByCategoryType.putIfAbsent("ESSENTIAL", 0.0);
+            expensesByCategoryType.putIfAbsent("NON_ESSENTIAL", 0.0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return expensesByCategoryType;
+    }
+
+    /**
+     * Retorna o total de despesas mês a mês para um usuário em um ano específico.
+     *
+     * @param loggedUser O usuário logado.
+     * @param year O ano de referência (ex: 2025).
+     * @return Lista com 12 posições representando o total de despesas de janeiro a dezembro.
+     */
+    public List<Double> getMonthlyExpensesForUserByYear(User loggedUser, int year) {
+        List<Double> monthlyExpenses = new ArrayList<>(Collections.nCopies(12, 0.0));
+
+        String sql = """
+            SELECT EXTRACT(MONTH FROM e."DATE") month, SUM(e.AMOUNT) total
+            FROM T_FIN_EXPENSE e
+            INNER JOIN T_FIN_ACCOUNT a ON e.ORIGIN_ACCOUNT_ID = a.ID
+            WHERE a.USER_ID = ?
+            AND EXTRACT(YEAR FROM e."DATE") = ?
+            GROUP BY EXTRACT(MONTH FROM e."DATE")
+        """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, loggedUser.getId());
+            ps.setInt(2, year);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int month = rs.getInt("month");
+                double total = rs.getDouble("total");
+                monthlyExpenses.set(month - 1, total);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return monthlyExpenses;
     }
 }

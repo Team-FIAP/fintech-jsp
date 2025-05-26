@@ -94,7 +94,7 @@ public class ExpenseServlet extends HttpServlet {
 
             Expense expenseInsert = expenseDao.insert(expense);
             req.setAttribute("expense", expenseInsert);
-            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+            req.getRequestDispatcher("transacoes-financeiras").forward(req, resp);
         } catch (DBException e) {
             req.setAttribute("error", "Erro ao cadastrar despesa" + e.getMessage());
             req.getRequestDispatcher("formulario-despesa.jsp").forward(req, resp);
@@ -122,7 +122,7 @@ public class ExpenseServlet extends HttpServlet {
 
             Expense expenseUpdate = expenseDao.update(expenseModify);
             req.setAttribute("expense", expenseUpdate);
-            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+            req.getRequestDispatcher("transacoes-financeiras").forward(req, resp);
         } catch (DBException e) {
             req.setAttribute("error", "Erro ao editar despesa" + e.getMessage());
             req.getRequestDispatcher("formulario-despesa.jsp").forward(req, resp);

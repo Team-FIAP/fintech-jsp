@@ -77,7 +77,7 @@ public class IncomeServlet extends HttpServlet {
 
             Income income = new Income(0L, amount, data, description, observation, account, createdAt);
             incomeDao.insert(income);
-            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+            req.getRequestDispatcher("transacoes-financeiras").forward(req, resp);
 
         } catch (DBException e) {
             req.setAttribute("error", "Erro ao cadastrar despesa" + e.getMessage());

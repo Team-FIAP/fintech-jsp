@@ -47,7 +47,7 @@
                     <tr>
                         <th>Nome da Conta</th>
                         <th>Saldo</th>
-                        <th>Ações</th>
+                        <th class="text-center">Ações</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -55,34 +55,30 @@
                         <tr>
                             <td>${account.name}</td>
                             <td>R$ <fmt:formatNumber value="${account.balance}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
-                            <td>
+                            <td class="text-nowrap text-center">
                                 <form action="contas" method="get" class="d-inline">
                                     <input type="hidden" name="id" value="${account.id}">
-                                    <button type="submit" class="btn btn-outline-warning btn-sm">
-                                        <i class="bi bi-pencil-square"></i> Editar
+                                    <button type="submit" class="btn btn-light btn-sm me-1">
+                                        Editar
                                     </button>
                                 </form>
                                 <form action="contas" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta conta?');">
                                     <input type="hidden" name="action" value="removeAccount">
                                     <input type="hidden" name="accountId" value="${account.id}">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">
-                                        <i class="bi bi-trash"></i> Excluir
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        Remover
                                     </button>
                                 </form>
                             </td>
                         </tr>
                     </c:forEach>
-                    <tr>
-                        <td colspan="3" style="height: 30px; border: none; background-color: #f0f0f0;"></td>
-                    </tr>
-                    <tr>
-                        <td><b>Saldo Total:</b></td>
-                        <td>
-                            R$ <fmt:formatNumber value="${totalBalance}" type="number" minFractionDigits="2" maxFractionDigits="2" />
-                        </td>
-                        <td></td>
-                    </tr>
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="text-end" colspan="2">Saldo total:</th>
+                            <td>R$ <fmt:formatNumber value="${totalBalance}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </c:if>
