@@ -23,6 +23,25 @@
 
   <main class="layout">
     <h2>Criar Nova Conta Bancária</h2>
+
+    <%-- Display error messages --%>
+    <% if (request.getAttribute("error") != null) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <%= request.getAttribute("error") %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <% } %>
+
+    <%-- Display success messages --%>
+    <% if (request.getAttribute("message") != null) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      <%= request.getAttribute("message") %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <% } %>
+
     <form action="contas" method="post" class="mt-4">
       <input type="hidden" name="action" value="createAccount">
       <div class="mb-3">
