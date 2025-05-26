@@ -13,28 +13,101 @@ import java.util.List;
 
 public class InvestmentDao implements BaseDao<Investment, Long> {
     @Override
-    public Investment findById(Long aLong) {
+    public Investment findById(Long id) {
+        String sql = "SELECT \n" +
+                "                i.ID,\n" +
+                "                i.DESCRIPTION,\n" +
+                "                i.OBSERVATION,\n" +
+                "                i.AMOUNT,\n" +
+                "                i.\"date\",\n" +
+                "                i.TYPE,\n" +
+                "                i.RISK,\n" +
+                "                i.LIQUIDITY,\n" +
+                "                i.DUE_DATE,\n" +
+                "                i.PROFITABILITY,\n" +
+                "                i.CREATED_AT,\n" +
+                "                oa.ID origin_account_id,\n" +
+                "                oa.NAME origin_account_name,\n" +
+                "                oa.BALANCE origin_account_balance,\n" +
+                "                oa.CREATED_AT origin_account_created_at\n" +
+                "            FROM T_FIN_INVESTMENT i\n" +
+                "            INNER JOIN T_FIN_ACCOUNT oa\n" +
+                "            ON i.ACCOUNT_ID = oa.ID" +
+                "            WHERE i.ID = ?";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps   = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    return fromResultSet(resultSet);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new DBException("Erro ao buscar investimento. " + e);
+        }
         return null;
     }
 
-    @Override
     public List<Investment> findAll() {
-        return List.of();
+
+        List<Investment> investments = new ArrayList<>();
+        String sql = "SELECT * FROM T_FIN_INVESTMENT";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()){
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                ResultSet resultSet = stmt.executeQuery();
+                while (resultSet.next()) {
+                    investments.add(fromResultSet(resultSet));
+                }
+            }
+
+            return investments;
+        } catch (SQLException e) {
+            throw new DBException("Erro ao buscar investimentos. " + e);
+        }
     }
 
-    /**
-     * Recupera todos os investimentos registrados no banco de dados, com base nos filtros fornecidos:
-     * intervalo de datas, conta de origem e usuário proprietário da conta.
-     *
-     * <p>Os investimentos são retornados ordenados pela data da operação em ordem decrescente.</p>
-     *
-     * @param startDate data inicial do intervalo de busca (inclusive); se {@code null}, não aplica filtro inicial
-     * @param endDate data final do intervalo de busca (inclusive); se {@code null}, não aplica filtro final
-     * @param accountId ID da conta de origem do investimento; se {@code null}, busca em todas as contas
-     * @param userId ID do usuário dono da conta; se {@code null}, busca investimentos de todos os usuários
-     * @return lista de objetos {@link Investment} que correspondem aos critérios informados; lista vazia se nenhum for encontrado
-     */
-    public List<Investment> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId, boolean redeemed) {
+    public List<Investment> findAllByUserId(Long userId) {
+        String sql = "SELECT\n" +
+                "                i.ID,\n" +
+                "                i.DESCRIPTION,\n" +
+                "                i.OBSERVATION,\n" +
+                "                i.AMOUNT,\n" +
+                "                i.\"date\",\n" +
+                "                i.TYPE,\n" +
+                "                i.RISK,\n" +
+                "                i.LIQUIDITY,\n" +
+                "                i.DUE_DATE,\n" +
+                "                i.PROFITABILITY,\n" +
+                "                i.CREATED_AT,\n" +
+                "                oa.ID origin_account_id,\n" +
+                "                oa.NAME origin_account_name,\n" +
+                "                oa.BALANCE origin_account_balance,\n" +
+                "                oa.CREATED_AT origin_account_created_at\n" +
+                "            FROM T_FIN_INVESTMENT i\n" +
+                "            INNER JOIN T_FIN_ACCOUNT oa\n" +
+                "            ON i.ACCOUNT_ID = oa.ID" +
+                "            WHERE oa.USER_ID = ?";
+
+        List<Investment> investments = new ArrayList<>();
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ResultSet resultSet = ps.executeQuery();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return investments;
+    }
+
+    public List<Investment> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId) {
         List<Investment> investments = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
             SELECT 
@@ -48,8 +121,6 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
                 i.LIQUIDITY,
                 i.PROFITABILITY,
                 i.DUE_DATE,
-                i.INTEREST_RATE,
-                i.REDEEMED,
                 i.CREATED_AT,
                 oa.id origin_account_id,
                 oa.name origin_account_name,
@@ -77,8 +148,6 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
             sql.append(" AND oa.USER_ID = ?");
         }
 
-        sql.append(" AND i.REDEEMED = ?");
-
         sql.append(" ORDER BY i.\"DATE\" DESC");
 
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
@@ -99,10 +168,8 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
             }
 
             if (userId != null) {
-                ps.setLong(index++, userId);
+                ps.setLong(index, userId);
             }
-
-            ps.setBoolean(index, redeemed);
 
             ResultSet rs = ps.executeQuery();
 
@@ -118,17 +185,111 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
 
     @Override
     public Investment insert(Investment entity) throws DBException {
-        return null;
-    }
+        if (entity == null) {
+            throw new DBException("Não é possível inserir um investimento nulo");
+        }
 
+        if (entity.getOriginAccount() == null) {
+            throw new DBException("A conta de origem do investimento não pode ser nula");
+        }
+
+        String sql = "INSERT INTO T_FIN_INVESTMENT (\n" +
+                "                AMOUNT,\n" +
+                "                \"date\",\n" +
+                "                TYPE,\n" +
+                "                RISK,\n" +
+                "                LIQUIDITY,\n" +
+                "                PROFITABILITY,\n" +
+                "                DUE_DATE,\n" +
+                "                ACCOUNT_ID,\n" +
+                "                DESCRIPTION,\n" +
+                "                OBSERVATION\n" +
+                "                ) VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, new String[]{"ID"})) {
+
+            ps.setDouble(1, entity.getAmount());
+            ps.setDate(2, Date.valueOf(entity.getDate()));
+            ps.setString(3, entity.getInvestmentType().getDescription());
+            ps.setString(4, entity.getRisk());
+            ps.setString(5, entity.getLiquidity());
+            ps.setDouble(6, entity.getProfitability());
+            ps.setDate(7, entity.getDueDate() != null ? Date.valueOf(entity.getDueDate()) : null);
+            ps.setLong(8, entity.getOriginAccount().getId());
+            ps.setString(9, entity.getDescription());
+            ps.setString(10, entity.getObservation());
+
+            int affectedRows = ps.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new DBException("A criação do investimento falhou, nenhuma linha afetada.");
+            }
+
+            // Obter o ID gerado
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    Long id = generatedKeys.getLong(1);
+                    entity.setId(id);
+                    return entity;
+                } else {
+                    throw new DBException("A criação do investimento falhou, não foi possível obter o ID.");
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new DBException("Erro ao criar investimento: " + e.getMessage(), e);
+        }
+    }
     @Override
     public Investment update(Investment entity) throws DBException {
-        return null;
+        String sql = """
+                UPDATE T_FIN_INVESTMENT SET
+                AMOUNT = ?,
+                "DATE" = ?,
+                TYPE = ?,
+                RISK = ?,
+                LIQUIDITY = ?,
+                PROFITABILITY = ?,
+                DUE_DATE = ?,
+                DESCRIPTION = ?,
+                OBSERVATION = ?
+                WHERE ACCOUNT_ID = ?
+        """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, entity.getAmount());
+            ps.setDate(2, Date.valueOf(entity.getDate()));
+            ps.setString(3, entity.getInvestmentType().getDescription());
+            ps.setString(4, entity.getRisk());
+            ps.setString(5, entity.getLiquidity());
+            ps.setDouble(6, entity.getProfitability());
+            ps.setDate(7, entity.getDueDate() != null ? Date.valueOf(entity.getDueDate()) : null);
+            ps.setString(9, entity.getDescription());
+            ps.setString(10, entity.getObservation());
+
+            ps.executeUpdate();
+            return findById(entity.getId());
+
+        } catch (SQLException e) {
+            throw new DBException("Erro ao atualizar investimento. " + e.getMessage());
+        }
     }
 
     @Override
     public void delete(Investment entity) throws DBException {
+        String sql = "DELETE FROM T_FIN_INVESTMENT WHERE ID = ?";
 
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, entity.getId());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DBException("Erro ao deletar investimento. " + e.getMessage());
+        }
     }
 
     /**
