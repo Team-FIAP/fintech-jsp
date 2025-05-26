@@ -21,7 +21,6 @@ public class Account {
         this.name = name;
         this.balance = balance;
         this.user = user;
-
     }
 
     public Long getId() {

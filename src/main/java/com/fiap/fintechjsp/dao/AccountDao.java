@@ -1,6 +1,7 @@
 package com.fiap.fintechjsp.dao;
 
 import com.fiap.fintechjsp.exception.DBException;
+import com.fiap.fintechjsp.exception.EntityNotFoundException;
 import com.fiap.fintechjsp.model.Account;
 import com.fiap.fintechjsp.model.User;
 
@@ -12,6 +13,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AccountDao implements BaseDao<Account, Long> {
+    @Override
+    public Account findById(Long id) {
+
+        String sql = """
+            SELECT
+                a.ID,
+                a.NAME,
+                a.BALANCE,
+                a.CREATED_AT,
+                u.ID user_id,
+                u.NAME user_name,
+                u.USERNAME user_username,
+                u.PASSWORD user_password,
+                u.CPF user_cpf,
+                u.CREATED_AT user_created_at
+            FROM T_FIN_ACCOUNT a
+            INNER JOIN T_FIN_USER u ON a.USER_ID = u.ID
+            WHERE a.ID = ?
+        """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setLong(1, id);
+                ResultSet resultSet = stmt.executeQuery();
+                if (!resultSet.next()) {
+                    throw new EntityNotFoundException(id);
+                }
+                return fromResultSet(resultSet);
+            }
+        } catch (SQLException e) {
+            throw new DBException(e);
+        }
+    }
+
     @Override
     public List<Account> findAll() {
         List<Account> accounts = new ArrayList<>();
@@ -32,35 +67,40 @@ public class AccountDao implements BaseDao<Account, Long> {
 
     }
 
-    @Override
-    public Account findById(Long id) {
-        String sql = "SELECT\n" +
-                "                a.ID,\n" +
-                "                a.NAME,\n" +
-                "                a.BALANCE,\n" +
-                "                a.CREATED_AT,\n" +
-                "                u.ID user_id,\n" +
-                "                u.NAME user_name,\n" +
-                "                u.USERNAME user_username,\n" +
-                "                u.PASSWORD user_password,\n" +
-                "                u.CPF user_cpf,\n" +
-                "                u.CREATED_AT user_created_at\n" +
-                "            FROM T_FIN_ACCOUNT a\n" +
-                "            INNER JOIN T_FIN_USER u ON a.USER_ID = u.ID " +
-                "WHERE a.ID = ?";
+    public List<Account> findAllByUserId(Long userId) {
+        List<Account> accounts = new ArrayList<>();
+        String sql = """
+                    SELECT
+                        a.ID,
+                        a.NAME,
+                        a.BALANCE,
+                        a.CREATED_AT,
+                        u.ID user_id,
+                        u.NAME user_name,
+                        u.USERNAME user_username,
+                        u.PASSWORD user_password,
+                        u.CPF user_cpf,
+                        u.CREATED_AT user_created_at
+                    FROM T_FIN_ACCOUNT a
+                    INNER JOIN T_FIN_USER u ON a.USER_ID = u.ID
+                    WHERE a.USER_ID = ?
+                """;
 
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-            PreparedStatement ps= conn.prepareStatement(sql)) {
-                ps.setLong(1, id);
-                ResultSet resultSet = ps.executeQuery();
-                if (resultSet.next()) {
-                    return fromResultSet(resultSet);
-                }
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
 
-            } catch (SQLException e) {
+            ps.setLong(1, userId);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                accounts.add(fromResultSet(rs));
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+
+        return accounts;
     }
 
     public Account insert(Account account) throws DBException {
@@ -68,11 +108,6 @@ public class AccountDao implements BaseDao<Account, Long> {
 
         try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            System.out.println("Inserting account:");
-            System.out.println("Name: " + account.getName());
-            System.out.println("Balance: " + account.getBalance());
-            System.out.println("User ID: " + account.getUser().getId());
 
             ps.setString(1, account.getName());
             ps.setDouble(2, account.getBalance());
@@ -125,6 +160,21 @@ public class AccountDao implements BaseDao<Account, Long> {
         }
     }
 
+    public boolean existsByName(String name) {
+        String sql = "SELECT * FROM T_FIN_ACCOUNT WHERE UPPER(NAME) = UPPER(?)";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ResultSet resultSet = ps.executeQuery();
+            return resultSet.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Account fromResultSet(ResultSet rs) {
         try {
             return new Account(
@@ -146,63 +196,5 @@ public class AccountDao implements BaseDao<Account, Long> {
         }
 
         return null;
-    }
-
-    public boolean existsByName(String name) {
-        String sql = "SELECT * FROM T_FIN_ACCOUNT WHERE UPPER(NAME) = UPPER(?)";
-
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, name);
-                ResultSet resultSet = ps.executeQuery();
-                return resultSet.next();
-
-            } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public List<Account> findAllByUserId(Long userId) {
-        String sql = "SELECT\n" +
-                "                a.ID,\n" +
-                "                a.NAME,\n" +
-                "                a.BALANCE,\n" +
-                "                a.CREATED_AT,\n" +
-                "                u.ID user_id,\n" +
-                "                u.NAME user_name,\n" +
-                "                u.USERNAME user_username,\n" +
-                "                u.PASSWORD user_password,\n" +
-                "                u.CPF user_cpf,\n" +
-                "                u.CREATED_AT user_created_at\n" +
-                "            FROM T_FIN_ACCOUNT a\n" +
-                "            INNER JOIN T_FIN_USER u ON a.USER_ID = u.ID\n" +
-                "            WHERE u.ID = ?";
-
-        List<Account> accounts = new ArrayList<>();
-
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, userId);
-            ResultSet resultSet = ps.executeQuery();
-
-            System.out.println("Querying accounts for userId: " + userId); // Debug log
-            int count = 0; // Counter for logging
-
-            while (resultSet.next()) {
-                count++;
-                Account account = fromResultSet(resultSet);
-                accounts.add(account);
-                // Debug log
-                System.out.println("Found account: ID=" + account.getId() + ", Name=" + account.getName() + ", Balance=" + account.getBalance());
-            }
-
-            System.out.println("Total accounts found: " + count); // Debug log
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return accounts;
     }
 }

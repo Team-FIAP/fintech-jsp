@@ -3,6 +3,7 @@ package com.fiap.fintechjsp.controller;
 import com.fiap.fintechjsp.dao.*;
 import com.fiap.fintechjsp.exception.DBException;
 import com.fiap.fintechjsp.model.*;
+import com.fiap.fintechjsp.utils.AuthUtils;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -101,12 +102,8 @@ public class TransactionServlet extends HttpServlet {
                 return;
             }
 
-            // TODO: Remover as próximas duas linhas (Apenas para testes)
-            User testUser = new User(1L, "Will", "will@email.com", "123", "111.111.111-11", LocalDateTime.now());
-            req.getSession().setAttribute("loggedUser", testUser);
-
             // Obtendo o usuário da sessão
-            User loggedUser = (User) req.getSession().getAttribute("loggedUser");
+            User loggedUser = AuthUtils.getUserFromSession(req);
             if (loggedUser == null) {
                 resp.sendRedirect("login");
                 return;
@@ -130,7 +127,7 @@ public class TransactionServlet extends HttpServlet {
             req.setAttribute("transactions", transactions);
             req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
         } catch (DBException e) {
-            e.printStackTrace(); // ou use um logger
+            e.printStackTrace();
             req.setAttribute("error", "Ocorreu um erro ao carregar as transações.");
             req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
         }
@@ -167,7 +164,7 @@ public class TransactionServlet extends HttpServlet {
         }
 
         if (type == null || type.isBlank() || type.equalsIgnoreCase("INVESTIMENTO")) {
-            transactions.addAll(investmentDao.findAll(startDate, endDate, accountId, userId));
+            transactions.addAll(investmentDao.findAll(startDate, null, accountId, userId, false));
         }
 
         return transactions;

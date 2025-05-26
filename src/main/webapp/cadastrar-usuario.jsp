@@ -15,7 +15,7 @@
 
 <div class="container min-vh-100 d-flex justify-content-center align-items-center">
     <div class="col-md-6 col-lg-5 p-5 rounded shadow form-container">
-        <h2 class="mb-4 text-center text-light">Cadastro de Usuário</h2>
+        <h1 class="mb-4 text-center text-light">Cadastro de Usuário</h1>
 
         <%-- Alerta de erro --%>
         <c:if test="${not empty error}">
@@ -71,8 +71,8 @@
 <script src="resources/js/imask.js"></script>
 <!-- Bootstrap JS -->
 <script src="resources/js/bootstrap.bundle.js"></script>
-<script src="resources/js/globals.js"></script>
 <script src="resources/js/cadastrar-usuario.js"></script>
+<script src="resources/js/globals.js"></script>
 </body>
 </html>
 

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="resources/css/bootstrap.css">
     <%-- CSS Global --%>
     <link rel="stylesheet" href="resources/css/globals.css">
+    <link rel="stylesheet" href="resources/css/transacoes-financeiras.css">
 </head>
 <body class="d-flex flex-column bg-dark text-white">
 <jsp:include page="/includes/header.jsp"/>
@@ -18,7 +19,7 @@
     <jsp:include page="/includes/sidebar.jsp"/>
 
     <main class="layout">
-        <h2 class="mb-4">Transações Financeiras</h2>
+        <h1 class="mb-4">Transações Financeiras</h1>
 
         <%-- Filtros --%>
         <form method="get" class="row g-3 mb-4 needs-validation" novalidate>
@@ -75,7 +76,7 @@
         <%-- Alerta de sucesso na remoção --%>
         <c:if test="${not empty success}">
             <div class="alert alert-success" role="alert">
-                Transação removida com sucesso
+                Transação removida com sucesso!
             </div>
         </c:if>
 
@@ -125,19 +126,19 @@
                                 <td>${trans.originAccount.name}</td>
                                 <td class="text-nowrap text-center">
                                     <a
-                                        class="btn btn-light btn-sm me-1"
-                                        title="Editar"
-                                        href="${editUrl}"
+                                            class="btn btn-light btn-sm me-1"
+                                            title="Editar"
+                                            href="${editUrl}"
                                     >
                                         Editar
                                     </a>
                                     <button
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#confirmDeleteModal"
-                                        data-id="${trans.id}"
-                                        data-type="${trans.type}"
-                                        class="btn btn-danger btn-sm"
-                                        title="Remover"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmDeleteModal"
+                                            data-id="${trans.id}"
+                                            data-type="${trans.type}"
+                                            class="btn btn-danger btn-sm"
+                                            title="Remover"
                                     >
                                         Remover
                                     </button>
@@ -156,9 +157,9 @@
                                 <td>${trans.destinationAccount.name}</td>
                                 <td class="text-nowrap text-center">
                                     <a
-                                        class="btn btn-light btn-sm me-1"
-                                        title="Editar"
-                                        href="${editUrl}"
+                                            class="btn btn-light btn-sm me-1"
+                                            title="Editar"
+                                            href="${editUrl}"
                                     >
                                         Editar
                                     </a>
@@ -211,9 +212,9 @@
                                 <td>${trans.originAccount.name}</td>
                                 <td class="text-nowrap text-center">
                                     <a
-                                        class="btn btn-light btn-sm me-1"
-                                        title="Editar"
-                                        href="${editUrl}"
+                                            class="btn btn-light btn-sm me-1"
+                                            title="Editar"
+                                            href="${editUrl}"
                                     >
                                         Editar
                                     </a>
@@ -237,12 +238,14 @@
         </div>
 
         <!-- Modal de confirmação -->
-        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content bg-dark text-white">
                     <div class="modal-header">
                         <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Fechar"></button>
                     </div>
                     <div class="modal-body">
                         Tem certeza que deseja remover esta transação?
@@ -258,6 +261,19 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="fab-container">
+            <!-- Menu de ações (escondido por padrão) -->
+            <div class="fab-menu d-none" id="fabMenu">
+                <a href="receitas?action=cadastrar" class="btn btn-primary">Cadastrar Receita</a>
+                <a href="despesas?action=cadastrar" class="btn btn-success">Cadastrar Despesa</a>
+                <a href="transferencias?action=cadastrar" class="btn btn-warning">Cadastrar Transferência</a>
+            </div>
+
+            <!-- Botão flutuante principal -->
+            <button class="btn btn-primary rounded-circle p-3" id="fabMenuButton" >
+                <i class="bi bi-plus-lg"></i> <!-- Bootstrap Icons -->
+            </button>
         </div>
     </main>
 </div>

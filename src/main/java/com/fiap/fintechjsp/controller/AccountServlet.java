@@ -136,7 +136,7 @@ public class AccountServlet extends HttpServlet {
     private void listAccounts(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User loggedUser = (User) req.getSession().getAttribute("loggedUser");
         if (loggedUser == null) {
-            resp.sendRedirect("login.jsp");
+            resp.sendRedirect("login");
             return;
         }
 
@@ -151,9 +151,6 @@ public class AccountServlet extends HttpServlet {
             double totalBalance = accounts.stream()
                     .mapToDouble(Account::getBalance)
                     .sum();
-
-            // Add debug message
-            System.out.println("Found " + accounts.size() + " accounts for user ID: " + loggedUser.getId());
 
             // Get message from session if exists
             String message = (String) req.getSession().getAttribute("message");
