@@ -13,6 +13,7 @@ IMask(cpfElement, {
     form.addEventListener("submit", function (event) {
         // Reset feedback
         confirmPassword.setCustomValidity("");
+        confirmFeedback.textContent = "A confirmação de senha obrigatória.";
 
         if (password.value !== confirmPassword.value) {
             confirmPassword.setCustomValidity("As senhas devem ser compatíveis");
