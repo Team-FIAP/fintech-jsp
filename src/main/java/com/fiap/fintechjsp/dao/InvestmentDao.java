@@ -107,7 +107,7 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
         return investments;
     }
 
-    public List<Investment> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId) {
+    public List<Investment> findAll(LocalDate startDate, LocalDate endDate, Long accountId, Long userId, boolean redeemed) {
         List<Investment> investments = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
             SELECT 
@@ -148,6 +148,8 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
             sql.append(" AND oa.USER_ID = ?");
         }
 
+        sql.append(" AND i.REDEEMED = ?");
+
         sql.append(" ORDER BY i.\"DATE\" DESC");
 
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
@@ -168,8 +170,10 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
             }
 
             if (userId != null) {
-                ps.setLong(index, userId);
+                ps.setLong(index++, userId);
             }
+
+            ps.setBoolean(index, redeemed);
 
             ResultSet rs = ps.executeQuery();
 
