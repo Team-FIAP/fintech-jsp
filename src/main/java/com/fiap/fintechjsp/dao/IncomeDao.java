@@ -20,7 +20,7 @@ public class IncomeDao implements BaseDao<Income, Long> {
                         i.DESCRIPTION,
                         i.OBSERVATION,
                         i.AMOUNT,
-                        i."date",
+                        i."DATE",
                         i.CREATED_AT,
                         oa.ID origin_account_id,
                         oa.NAME origin_account_name,
@@ -28,7 +28,7 @@ public class IncomeDao implements BaseDao<Income, Long> {
                         oa.CREATED_AT origin_account_created_at
                     FROM T_FIN_INCOME i
                     INNER JOIN T_FIN_ACCOUNT oa
-                    ON i.ACCOUNT_ID = oa.ID
+                    ON i.ORIGIN_ACCOUNT_ID = oa.ID
                     WHERE i.ID = ?
                 """);
 
@@ -154,7 +154,7 @@ public class IncomeDao implements BaseDao<Income, Long> {
     @Override
     public Income update(Income income) throws DBException {
         String sql = """
-            UPDATE T_FIN_INCOME SET AMOUNT = ?, "date" = ?, DESCRIPTION = ?, OBSERVATION = ? WHERE ID = ?
+            UPDATE T_FIN_INCOME SET AMOUNT = ?, "DATE" = ?, DESCRIPTION = ?, OBSERVATION = ? WHERE ID = ?
         """;
 
         try (Connection connection = ConnectionManager.getInstance().getConnection()) {

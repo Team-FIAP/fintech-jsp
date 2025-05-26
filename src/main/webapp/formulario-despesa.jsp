@@ -81,16 +81,14 @@
                             </div>
                         </div>
 
-                        <label for="description" value="${expense.description}" id="id-description" class="fw-bold mt-3">Descrição</label>
-                        <div class="form-floating mt-2">
-                            <textarea class="form-control" placeholder="Descrição" id="description" name="description"
-                                      style="height: 100px" maxlength="255">${expense.description}</textarea>
+                        <div class="form-group mt-2">
+                            <label for="description" value="${expense.description}" id="id-description" class="form-label fw-bold">Descrição</label>
+                            <input class="form-control" id="description" name="description" maxlength="255" value="${expense.description}">
                         </div>
 
                         <div class="form-group mt-3">
                             <label class="fw-bold" for="id-data">Data*</label>
-                            <input type="date" name="data" id="data" class="form-control" value="${expense.date}"
-                                   required>
+                            <input type="date" name="data" id="data" class="form-control" value="${expense.date}" required>
 
                             <div class="invalid-feedback">
                                 Por favor, informe a data da despesa.
@@ -99,8 +97,9 @@
 
                         <div class="form-group mt-3">
                             <label class="fw-bold" for="id-observa" id="observation">Observações</label>
-                            <input type="text" name="observation" id="observation" class="form-control"
-                                   value="${expense.observation}">
+                            <textarea type="text" name="observation" id="observation" class="form-control">
+                                ${expense.observation}
+                            </textarea>
                         </div>
 
                         <div class="col-md-12">

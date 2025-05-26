@@ -40,6 +40,10 @@
             </div>
         </c:if>
 
+        <div class="d-flex justify-content-end mb-3">
+            <a class="btn btn-dark" href="contas?action=cadastrar">Cadastrar conta</a>
+        </div>
+
         <c:if test="${not empty accounts}">
             <div class="table-responsive mt-4">
                 <table class="table table-dark table-bordered align-middle">
@@ -56,14 +60,11 @@
                             <td>${account.name}</td>
                             <td>R$ <fmt:formatNumber value="${account.balance}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
                             <td class="text-nowrap text-center">
-                                <form action="contas" method="get" class="d-inline">
-                                    <input type="hidden" name="id" value="${account.id}">
-                                    <button type="submit" class="btn btn-light btn-sm me-1">
-                                        Editar
-                                    </button>
-                                </form>
+                                <a href="contas?action=editar&id=${account.id}" type="submit" class="btn btn-light btn-sm me-1">
+                                    Editar
+                                </a>
                                 <form action="contas" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta conta?');">
-                                    <input type="hidden" name="action" value="removeAccount">
+                                    <input type="hidden" name="action" value="remover">
                                     <input type="hidden" name="accountId" value="${account.id}">
                                     <button type="submit" class="btn btn-danger btn-sm">
                                         Remover
@@ -86,7 +87,7 @@
         <c:if test="${empty accounts}">
             <div class="mt-4">
                 <p>Você ainda não possui contas cadastradas.</p>
-                <a href="cadastrar-conta.jsp" class="btn btn-primary">Cadastrar uma conta</a>
+                <a href="cadastrar-conta.jsp" class="btn btn-dark">Cadastrar uma conta</a>
             </div>
         </c:if>
     </main>

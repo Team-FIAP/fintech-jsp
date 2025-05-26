@@ -97,7 +97,7 @@ public class IncomeServlet extends HttpServlet {
 
             Income incomeUpdate = incomeDao.update(incomeModify);
             req.setAttribute("income", incomeUpdate);
-            req.getRequestDispatcher("transacoes-financeiras.jsp").forward(req, resp);
+            req.getRequestDispatcher("transacoes-financeiras").forward(req, resp);
 
         } catch (
                 DBException e) {

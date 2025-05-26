@@ -39,7 +39,6 @@
                             <select class="form-select" id="originAccountId" name="originAccountId" required>
                                 <option value=""></option>
                                 <c:forEach var="account" items="${accounts}">
-
                                     <option value="${account.id}"
                                             <c:if test="${income.originAccount.id == account.id}">selected</c:if>>${account.name}</option>
                                 </c:forEach>
@@ -49,8 +48,10 @@
                             </div>
                         </div>
                         <div class=" form-group mt-3">
-                            <label class="fw-bold" for="id-amount" id="id-amount">Valor*</label>
-                            <div class="input-group"><span class="input-group-text">R$</span> <input
+                            <label class="form-label fw-bold" for="id-amount" id="id-amount">Valor*</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input
                                     type="number"
                                     name="amount"
                                     id="amount"
@@ -58,18 +59,21 @@
                                     min="0.01"
                                     step="0.01"
                                     inputmode="decimal"
-                                    value="${income.amount}" required
-                            >
+                                    value="${income.amount}"
+                                    required
+                                >
                                 <div class="invalid-feedback">
                                     Por favor, insira um valor monetário positivo (Ex: 123.45).
                                 </div>
                             </div>
                         </div>
 
-                        <label for="description" value="${income.description}" id="id-description" class="fw-bold mt-3">Descrição</label>
-                        <div class="form-floating mt-2">
-                            <textarea class="form-control" placeholder="Descrição" id="description" name="description"
-                                      style="height: 100px" maxlength="255">${income.description}</textarea>
+                        <div class="form-group mt-2">
+                            <label for="description" value="${income.description}" id="id-description" class="form-label fw-bold mt-3">Descrição</label>
+                            <input class="form-control" id="description" name="description" required maxlength="255" value="${income.description}">
+                            <div class="invalid-feedback">
+                                Por favor, informe a descrição da despesa.
+                            </div>
                         </div>
 
                         <div class="form-group mt-3">
@@ -83,9 +87,8 @@
                         </div>
 
                         <div class="form-group mt-3">
-                            <label class="fw-bold" for="id-observa" id="observation">Observações</label>
-                            <input type="text" name="observation" id="observation" class="form-control"
-                                   value="${income.observation}">
+                            <label class="form-label fw-bold" for="id-observa" id="observation">Observações</label>
+                            <textarea type="text" name="observation" id="observation" class="form-control">${income.observation}</textarea>
                         </div>
 
                         <div class="col-md-12">

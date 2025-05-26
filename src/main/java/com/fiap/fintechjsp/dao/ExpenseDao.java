@@ -18,7 +18,7 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
                 e.DESCRIPTION,
                 e.OBSERVATION,
                 e.AMOUNT,
-                e."date",
+                e."DATE",
                 e.CREATED_AT,
                 oa.ID origin_account_id,
                 oa.NAME origin_account_name,
@@ -31,7 +31,7 @@ public class ExpenseDao implements BaseDao<Expense, Long> {
                 ec.COLOR expense_category_color,
                 ec.CREATED_AT expense_category_created_at
                 FROM T_FIN_EXPENSE e
-                INNER JOIN T_FIN_ACCOUNT oa ON e.ACCOUNT_ID = oa.ID
+                INNER JOIN T_FIN_ACCOUNT oa ON e.ORIGIN_ACCOUNT_ID = oa.ID
                 INNER JOIN T_FIN_EXPENSE_CATEGORY ec ON e.CATEGORY_ID = ec.ID
                 WHERE e.ID = ?
                 """);

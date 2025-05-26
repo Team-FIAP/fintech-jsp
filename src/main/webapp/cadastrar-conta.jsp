@@ -43,7 +43,7 @@
     <% } %>
 
     <form action="contas" method="post" class="mt-4">
-      <input type="hidden" name="action" value="createAccount">
+      <input type="hidden" name="action" value="cadastrar">
       <div class="mb-3">
         <label for="nome" class="form-label">Nome</label>
         <input type="text" class="form-control" id="nome" name="nome" required>

@@ -26,10 +26,10 @@ public class AccountServlet extends HttpServlet {
         String action = req.getParameter("action");
 
         switch (action) {
-            case "createAccount" -> createAccount(req, resp);
-            case "removeAccount" -> removeAccount(req, resp);
-            case "editAccount" -> editAccount(req, resp);
-            case "listAccounts" -> listAccounts(req, resp);
+            case "cadastrar" -> createAccount(req, resp);
+            case "remover" -> removeAccount(req, resp);
+            case "editar" -> editAccount(req, resp);
+            default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Página não encontrada");
         }
     }
 
@@ -41,15 +41,12 @@ public class AccountServlet extends HttpServlet {
         // Acessado por /contas?action=list
         if ((action == null || action.equals("list")) && path.equals("/contas")) {
             listAccounts(req, resp);
-        }
-
-        // Acessado por /contas/listar-contas
-        else if (path.equals("/contas/listar-contas")) {
+        } else if (path.equals("/contas/listar-contas")) {
             listAccounts(req, resp);
-        }
-
-        else if ("editAccount".equals(action)){
+        } else if ("editar".equals(action)){
             showEditForm(req, resp);
+        } else if ("cadastrar".equals(action)) {
+            req.getRequestDispatcher("cadastrar-conta.jsp").forward(req, resp);
         }
     }
 
@@ -61,17 +58,12 @@ public class AccountServlet extends HttpServlet {
     }
 
     private void createAccount(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        UserDao userDao = new UserDao();
-
         // Create test user
         User testUser = new User(1l, "WIll", "will@email.com", "123", "111.111.111-11", LocalDateTime.now());
 
         req.getSession().setAttribute("loggedUser", testUser);
 
         User loggedUser = (User) req.getSession().getAttribute("loggedUser");
-
-        System.out.println("USER ID: " + loggedUser.getId());
 
         if (loggedUser == null) {
             resp.sendRedirect("login");
@@ -296,9 +288,9 @@ public class AccountServlet extends HttpServlet {
 
     private void showEditForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // Get account by ID and forward to edit form JSP
-        String accountIdStr = req.getParameter("accountId");
-        Long accountId = Long.parseLong(accountIdStr);
-        Account account = accountDao.findById(accountId);
+        String idParam = req.getParameter("id");
+        Long id = Long.parseLong(idParam);
+        Account account = accountDao.findById(id);
 
         req.setAttribute("account", account);
         req.getRequestDispatcher("editar-conta.jsp").forward(req, resp);
