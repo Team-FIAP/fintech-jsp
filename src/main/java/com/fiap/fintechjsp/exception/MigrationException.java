@@ -21,6 +21,7 @@ public class MigrationException extends RuntimeException {
         super(cause);
     }
 
+
     protected MigrationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
