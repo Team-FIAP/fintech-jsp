@@ -3,10 +3,12 @@ package com.fiap.fintechjsp.dao;
 import com.fiap.fintechjsp.exception.DBException;
 import com.fiap.fintechjsp.model.Account;
 import com.fiap.fintechjsp.model.Income;
+import com.fiap.fintechjsp.model.User;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class IncomeDao implements BaseDao<Income, Long> {
@@ -259,5 +261,81 @@ public class IncomeDao implements BaseDao<Income, Long> {
         }
 
         return null;
+    }
+
+    /**
+     * Retorna o total de receitas de um usuário dentro de um período específico.
+     *
+     * @param loggedUser O usuário cujas receitas devem ser somadas.
+     * @param startDate  A data inicial do período (inclusive).
+     * @param endDate    A data final do período (inclusive).
+     * @return O valor total das receitas no período informado. Retorna 0.0 se não houver receitas ou em caso de erro.
+     */
+    public double getTotalIncomesForUserByPeriod(User loggedUser, LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                    SELECT SUM(i.AMOUNT)
+                    FROM T_FIN_INCOME i
+                    INNER JOIN T_FIN_ACCOUNT a ON i.ORIGIN_ACCOUNT_ID = a.ID
+                    WHERE a.USER_ID = ?
+                    AND i."DATE" BETWEEN ? AND ?
+                """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, loggedUser.getId());
+            ps.setDate(2, java.sql.Date.valueOf(startDate));
+            ps.setDate(3, java.sql.Date.valueOf(endDate));
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDouble(1); // índice começa em 1
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Retorna o total de receitas mês a mês para um usuário em um ano específico.
+     *
+     * @param loggedUser O usuário logado.
+     * @param year       O ano de referência (ex: 2025).
+     * @return Lista com 12 posições representando o total de receitas de janeiro a dezembro.
+     */
+    public List<Double> getMonthlyIncomesForUserByYear(User loggedUser, int year) {
+        List<Double> monthlyIncomes = new ArrayList<>(Collections.nCopies(12, 0.0));
+
+        String sql = """
+                    SELECT EXTRACT(MONTH FROM i."DATE") month, SUM(i.AMOUNT) total
+                    FROM T_FIN_INCOME i
+                    INNER JOIN T_FIN_ACCOUNT a ON i.ORIGIN_ACCOUNT_ID = a.ID
+                    WHERE a.USER_ID = ?
+                    AND EXTRACT(YEAR FROM i."DATE") = ?
+                    GROUP BY EXTRACT(MONTH FROM i."DATE")
+                """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, loggedUser.getId());
+            ps.setInt(2, year);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int month = rs.getInt("month");
+                double total = rs.getDouble("total");
+                monthlyIncomes.set(month - 1, total);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return monthlyIncomes;
     }
 }

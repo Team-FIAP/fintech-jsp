@@ -12,7 +12,7 @@
   <div class="offcanvas-body d-flex flex-column p-0">
     <ul class="nav nav-pills nav-flush flex-column text-center mb-auto">
       <li class="nav-item">
-        <a href="" class="nav-link text-white py-3 border-0 rounded-0 <%= currentUri.contains("dashboard") ? "active bg-dark" : "" %>" title="Dashboard" data-bs-toggle="tooltip">
+        <a href="dashboard" class="nav-link text-white py-3 border-0 rounded-0 <%= currentUri.contains("dashboard") ? "active bg-dark" : "" %>" title="Dashboard" data-bs-toggle="tooltip">
           <i class="bi bi-speedometer2 fs-5"></i>
           <span class="d-none ms-2">Dashboard</span>
         </a>

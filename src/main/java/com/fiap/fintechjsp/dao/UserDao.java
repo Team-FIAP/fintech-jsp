@@ -197,6 +197,35 @@ public class UserDao implements BaseDao<User, Long> {
     }
 
     /**
+     * Calcula o saldo total de todas as contas associadas a um usuário.
+     *
+     * @param user O usuário cujas contas devem ser somadas.
+     * @return O valor total do saldo das contas do usuário. Retorna 0.0 se não houver contas ou em caso de erro.
+     */
+    public double getTotalBalance(User user) {
+        String sql = """
+            SELECT SUM(BALANCE)
+            FROM T_FIN_ACCOUNT
+            WHERE USER_ID = ?
+        """;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setLong(1, user.getId());
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    /**
      * Busca um usuário pelo username (e-mail).
      *
      * @param username E-mail do usuário

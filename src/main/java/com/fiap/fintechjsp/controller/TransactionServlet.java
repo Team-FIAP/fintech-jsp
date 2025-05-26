@@ -167,7 +167,7 @@ public class TransactionServlet extends HttpServlet {
         }
 
         if (type == null || type.isBlank() || type.equalsIgnoreCase("INVESTIMENTO")) {
-            transactions.addAll(investmentDao.findAll(startDate, endDate, accountId, userId));
+            transactions.addAll(investmentDao.findAll(startDate, null, accountId, userId, false));
         }
 
         return transactions;
