@@ -99,7 +99,7 @@ public class UserServlet extends HttpServlet {
             userDao.insert(user);
 
             req.setAttribute("message", "Usuário cadastrado com sucesso!");
-            req.getRequestDispatcher("login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/").forward(req, resp);
         } catch (DBException e) {
             req.setAttribute("error", "Erro ao cadastrar o usuário no banco de dados.");
             req.getRequestDispatcher("cadastrar-usuario.jsp").forward(req, resp);

@@ -122,7 +122,54 @@ public class TransferDao implements BaseDao<Transfer, Long> {
      */
     @Override
     public Transfer insert(Transfer entity) throws DBException {
-        throw new RuntimeException("Não implementado");
+        String insertSql = """
+            INSERT INTO T_FIN_TRANSFER (DESCRIPTION, AMOUNT, "DATE", ORIGIN_ACCOUNT_ID, DESTINATION_ACCOUNT_ID) 
+            VALUES (?, ?, ?, ?, ?)
+        """;
+
+        String updateOriginSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE - ? WHERE ID = ?";
+        String updateDestSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE + ? WHERE ID = ?";
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            conn.setAutoCommit(false); // Inicia transação
+
+            // 1. Subtrair saldo da conta de origem
+            try (PreparedStatement ps = conn.prepareStatement(updateOriginSql)) {
+                ps.setDouble(1, entity.getAmount());
+                ps.setLong(2, entity.getOriginAccount().getId());
+                ps.executeUpdate();
+            }
+
+            // 2. Adicionar saldo na conta de destino
+            try (PreparedStatement ps = conn.prepareStatement(updateDestSql)) {
+                ps.setDouble(1, entity.getAmount());
+                ps.setLong(2, entity.getDestinationAccount().getId());
+                ps.executeUpdate();
+            }
+
+            // 3. Inserir a transferência
+            try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                ps.setString(1, entity.getDescription());
+                ps.setDouble(2, entity.getAmount());
+                ps.setDate(3, java.sql.Date.valueOf(entity.getDate()));
+                ps.setLong(4, entity.getOriginAccount().getId());
+                ps.setLong(5, entity.getDestinationAccount().getId());
+
+                ps.executeUpdate();
+
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    long generatedId = rs.getLong(1);
+                    entity.setId(generatedId);
+                }
+            }
+
+            conn.commit(); // Confirma transação
+            return entity;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DBException("Erro ao inserir transferência e atualizar saldos", e);
+        }
     }
 
     /**

@@ -23,12 +23,23 @@ public class Investment extends Transaction {
         this.redeemed = redeemed;
     }
 
-    public double getGrossValue() {
+    public Investment(double amount, LocalDate date, String description, String observation, Account originAccount, InvestmentType investmentType, String risk, String liquidity, LocalDate dueDate, double interestRate) {
+        super(null, amount, date, description, observation, TransactionType.INVESTMENT, originAccount, null);
+        this.investmentType = investmentType;
+        this.risk = risk;
+        this.liquidity = liquidity;
+        this.profitability = calculateValueAt(dueDate);
+        this.dueDate = dueDate;
+        this.interestRate = interestRate;
+        this.redeemed = false;
+    }
+
+    public double getCurrentGrossValue() {
         return calculateValueAt(LocalDate.now());
     }
 
-    public double getAccumulatedEarnings() {
-        return getGrossValue() - getAmount();
+    public double getCurrentAccumulatedEarnings() {
+        return getCurrentGrossValue() - getAmount();
     }
 
     public double calculateValueAt(LocalDate date) {

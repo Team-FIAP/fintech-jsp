@@ -6,6 +6,7 @@ import com.fiap.fintechjsp.dao.InvestmentDao;
 import com.fiap.fintechjsp.dao.UserDao;
 import com.fiap.fintechjsp.model.Investment;
 import com.fiap.fintechjsp.model.User;
+import com.fiap.fintechjsp.utils.AuthUtils;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -44,12 +45,8 @@ public class DashboardServlet extends HttpServlet {
         LocalDate startDate = now.withDayOfMonth(1);
         LocalDate endDate = now.withDayOfMonth(now.lengthOfMonth());
 
-        // TODO: Remover as próximas duas linhas (Apenas para testes)
-        User testUser = new User(1L, "Will", "will@email.com", "123", "111.111.111-11", LocalDateTime.now());
-        req.getSession().setAttribute("loggedUser", testUser);
-
         // Obtendo o usuário da sessão
-        User loggedUser = (User) req.getSession().getAttribute("loggedUser");
+        User loggedUser = AuthUtils.getUserFromSession(req);
         if (loggedUser == null) {
             resp.sendRedirect("login");
             return;
@@ -65,8 +62,8 @@ public class DashboardServlet extends HttpServlet {
         double totalExpenses = expenseDao.getTotalExpensesForUserByPeriod(loggedUser, startDate, endDate);
 
         List<Investment> investments = investmentDao.findAll(startDate, null, null, loggedUser.getId(), false);
-        double totalGrossInvestments = investments.stream().mapToDouble(Investment::getGrossValue).sum();
-        double totalAccumulatedInvestments = investments.stream().mapToDouble(Investment::getAccumulatedEarnings).sum();
+        double totalGrossInvestments = investments.stream().mapToDouble(Investment::getCurrentGrossValue).sum();
+        double totalAccumulatedInvestments = investments.stream().mapToDouble(Investment::getCurrentAccumulatedEarnings).sum();
 
         // Receitas por categoria
         List<Map<String, Object>> expensesByCategory = expenseDao.getTotalExpensesByCategoryForUserInPeriod(loggedUser, startDate, endDate);

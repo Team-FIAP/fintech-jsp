@@ -212,54 +212,52 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
             throw new DBException("A conta de origem do investimento não pode ser nula");
         }
 
-        String sql = "INSERT INTO T_FIN_INVESTMENT (\n" +
-                "                AMOUNT,\n" +
-                "                \"date\",\n" +
-                "                TYPE,\n" +
-                "                RISK,\n" +
-                "                LIQUIDITY,\n" +
-                "                PROFITABILITY,\n" +
-                "                DUE_DATE,\n" +
-                "                ACCOUNT_ID,\n" +
-                "                DESCRIPTION,\n" +
-                "                OBSERVATION\n" +
-                "                ) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        String updateBalanceSql = "UPDATE T_FIN_ACCOUNT SET BALANCE = BALANCE - ? WHERE ID = ?";
+        String insertSql = """
+        INSERT INTO T_FIN_INVESTMENT (DESCRIPTION, OBSERVATION, AMOUNT, "DATE", TYPE, RISK, LIQUIDITY, DUE_DATE, PROFITABILITY, ORIGIN_ACCOUNT_ID, INTEREST_RATE, REDEEMED) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """;
 
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, new String[]{"ID"})) {
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            conn.setAutoCommit(false);
 
-            ps.setDouble(1, entity.getAmount());
-            ps.setDate(2, Date.valueOf(entity.getDate()));
-            ps.setString(3, entity.getInvestmentType().getDescription());
-            ps.setString(4, entity.getRisk());
-            ps.setString(5, entity.getLiquidity());
-            ps.setDouble(6, entity.getProfitability());
-            ps.setDate(7, entity.getDueDate() != null ? Date.valueOf(entity.getDueDate()) : null);
-            ps.setLong(8, entity.getOriginAccount().getId());
-            ps.setString(9, entity.getDescription());
-            ps.setString(10, entity.getObservation());
-
-            int affectedRows = ps.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new DBException("A criação do investimento falhou, nenhuma linha afetada.");
+            // 1. Atualiza o saldo da conta de origem
+            try (PreparedStatement updatePs = conn.prepareStatement(updateBalanceSql)) {
+                updatePs.setDouble(1, entity.getAmount());
+                updatePs.setLong(2, entity.getOriginAccount().getId());
+                updatePs.executeUpdate();
             }
 
-            // Obter o ID gerado
-            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    Long id = generatedKeys.getLong(1);
-                    entity.setId(id);
-                    return entity;
-                } else {
-                    throw new DBException("A criação do investimento falhou, não foi possível obter o ID.");
+            // 2. Insere o investimento
+            try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
+                insertPs.setString(1, entity.getDescription());
+                insertPs.setString(2, entity.getObservation());
+                insertPs.setDouble(3, entity.getAmount());
+                insertPs.setDate(4, Date.valueOf(entity.getDate()));
+                insertPs.setString(5, entity.getInvestmentType().getDescription());
+                insertPs.setString(6, entity.getRisk());
+                insertPs.setString(7, entity.getLiquidity());
+                insertPs.setDate(8, Date.valueOf(entity.getDueDate()));
+                insertPs.setDouble(9, entity.getProfitability());
+                insertPs.setLong(10, entity.getOriginAccount().getId());
+                insertPs.setDouble(11, entity.getInterestRate());
+                insertPs.setBoolean(12, entity.isRedeemed());
+
+                int affectedRows = insertPs.executeUpdate();
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    throw new DBException("A criação do investimento falhou, nenhuma linha afetada.");
                 }
             }
 
+            conn.commit();
+            return entity;
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DBException("Erro ao criar investimento: " + e.getMessage(), e);
         }
     }
+
     @Override
     public Investment update(Investment entity) throws DBException {
         String sql = """
@@ -278,6 +276,8 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
 
         try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
+
+
             ps.setDouble(1, entity.getAmount());
             ps.setDate(2, Date.valueOf(entity.getDate()));
             ps.setString(3, entity.getInvestmentType().getDescription());
@@ -289,8 +289,8 @@ public class InvestmentDao implements BaseDao<Investment, Long> {
             ps.setString(10, entity.getObservation());
 
             ps.executeUpdate();
-            return findById(entity.getId());
 
+            return findById(entity.getId());
         } catch (SQLException e) {
             throw new DBException("Erro ao atualizar investimento. " + e.getMessage());
         }

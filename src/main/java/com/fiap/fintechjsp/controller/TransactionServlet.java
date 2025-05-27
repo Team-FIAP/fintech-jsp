@@ -104,10 +104,6 @@ public class TransactionServlet extends HttpServlet {
 
             // Obtendo o usuário da sessão
             User loggedUser = AuthUtils.getUserFromSession(req);
-            if (loggedUser == null) {
-                resp.sendRedirect("login");
-                return;
-            }
 
             // Obtendo a lista de contas do usuário
             List<Account> accounts = accountDao.findAllByUserId(loggedUser.getId());

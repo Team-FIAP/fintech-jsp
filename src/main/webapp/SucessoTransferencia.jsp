@@ -34,8 +34,8 @@
                 <p class="fs-5">Seu novo saldo é: <strong>R$ <fmt:formatNumber value="${novoSaldo}" type="number" minFractionDigits="2" /></strong></p>
 
                 <div class="mt-4">
-                    <a href="CadastroTransferencia.jsp" class="btn btn-light me-2">Voltar</a>
-                    <a href="CadastroTransferencia.jsp" class="btn btn-success">Página Inicial</a>
+                    <a href="cadastrar-transferencia.jsp" class="btn btn-light me-2">Voltar</a>
+                    <a href="cadastrar-transferencia.jsp" class="btn btn-success">Página Inicial</a>
                 </div>
             </div>
         </div>

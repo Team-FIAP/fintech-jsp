@@ -38,7 +38,5 @@ build/
 .DS_Store
 
 ### Environment ###
-src/main/resources/.env.development
 .env
-.env.production
 .env.test

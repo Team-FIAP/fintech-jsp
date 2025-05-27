@@ -2,8 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <header class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
     <a class="navbar-brand d-flex align-items-center text-light" href="#">
-        <img src="../resources/img/logo.svg" alt="Logo" width="40" height="40" class="me-2">
-        Fintech
+        FinCon
     </a>
 
     <button class="btn text-light ms-3 d-none d-lg-inline-flex" id="sidebarToggle" type="button">

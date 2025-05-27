@@ -1,40 +1,59 @@
 package com.fiap.fintechjsp.controller;
 
-import br.com.fiap.fintechjsp.dao.LoginDAO;
+import com.fiap.fintechjsp.dao.LoginDAO;
+import com.fiap.fintechjsp.dao.UserDao;
+import com.fiap.fintechjsp.model.User;
+import com.fiap.fintechjsp.utils.AuthUtils;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
-@WebServlet("/Login")
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
+    private UserDao userDao;
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        userDao = new UserDao();
+    }
 
-        String usuario = request.getParameter("usuario");
-        String senha = request.getParameter("senha");
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        session.invalidate();
+        req.getRequestDispatcher("index.jsp").forward(req, resp);
+    }
 
-        usuario = (usuario != null) ? usuario.trim() : "";
-        senha = (senha != null) ? senha.trim() : "";
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            String username = req.getParameter("username");
+            String password = req.getParameter("password");
 
-        System.out.println("[LoginServlet] Usuário recebido: [" + usuario + "]");
-        System.out.println("[LoginServlet] Senha recebida: [" + senha + "]");
+            User user = userDao.findByUsername(username);
 
-        LoginDAO dao = new LoginDAO();
-        boolean autenticado = dao.validarLogin(usuario, senha);
+            if (user == null) {
+                req.setAttribute("error", "Usuário ou senha inválidos.");
+                req.getRequestDispatcher("/").forward(req, resp);
+                return;
+            }
 
-        if (autenticado) {
-            HttpSession session = request.getSession(true); // Cria sessão se não existir
-            session.setAttribute("usuarioLogado", usuario); // Aqui pode ser o username mesmo
+            if (!AuthUtils.checkPassword(password, user.getPassword())) {
+                req.setAttribute("error", "Usuário ou senha inválidos.");
+                req.getRequestDispatcher("/").forward(req, resp);
+                return;
+            }
 
-            response.sendRedirect("CadastroTransferencia.jsp");
-        } else {
-            request.setAttribute("erro", "Usuário ou senha inválidos.");
-            RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
-            dispatcher.forward(request, response);
+            HttpSession session = req.getSession(true);
+            session.setAttribute("loggedUser", user);
+
+            resp.sendRedirect("dashboard");
+        } catch (Exception e) {
+            req.setAttribute("error", "Falha ao realizar o login, confira os dados.");
+            req.getRequestDispatcher("/").forward(req, resp);
         }
     }
 }

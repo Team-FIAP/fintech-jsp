@@ -29,7 +29,7 @@
             <c:out value="${erro != null ? erro : 'Ocorreu um erro desconhecido.'}" />
           </p>
           <hr>
-          <a href="CadastroTransferencia.jsp" class="btn btn-light">Voltar</a>
+          <a href="cadastrar-transferencia.jsp" class="btn btn-light">Voltar</a>
         </div>
       </div>
     </div>

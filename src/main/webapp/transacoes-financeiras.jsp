@@ -125,13 +125,6 @@
                                 <td><fmt:formatDate pattern="dd/MM/yyyy" value="${parsedDate}"/></td>
                                 <td>${trans.originAccount.name}</td>
                                 <td class="text-nowrap text-center">
-                                    <a
-                                            class="btn btn-light btn-sm me-1"
-                                            title="Editar"
-                                            href="${editUrl}"
-                                    >
-                                        Editar
-                                    </a>
                                     <button
                                             data-bs-toggle="modal"
                                             data-bs-target="#confirmDeleteModal"
@@ -156,13 +149,6 @@
                                 <td><fmt:formatDate pattern="dd/MM/yyyy" value="${parsedDate}"/></td>
                                 <td>${trans.destinationAccount.name}</td>
                                 <td class="text-nowrap text-center">
-                                    <a
-                                            class="btn btn-light btn-sm me-1"
-                                            title="Editar"
-                                            href="${editUrl}"
-                                    >
-                                        Editar
-                                    </a>
                                     <button
                                             data-bs-toggle="modal"
                                             data-bs-target="#confirmDeleteModal"
@@ -211,13 +197,15 @@
                                 <td><fmt:formatDate pattern="dd/MM/yyyy" value="${parsedDate}"/></td>
                                 <td>${trans.originAccount.name}</td>
                                 <td class="text-nowrap text-center">
-                                    <a
-                                            class="btn btn-light btn-sm me-1"
-                                            title="Editar"
-                                            href="${editUrl}"
-                                    >
-                                        Editar
-                                    </a>
+                                    <c:if test="${trans.type != 'INVESTMENT'}">
+                                        <a
+                                                class="btn btn-light btn-sm me-1"
+                                                title="Editar"
+                                                href="${editUrl}"
+                                        >
+                                            Editar
+                                        </a>
+                                    </c:if>
                                     <button
                                             data-bs-toggle="modal"
                                             data-bs-target="#confirmDeleteModal"
@@ -265,9 +253,10 @@
         <div class="fab-container">
             <!-- Menu de ações (escondido por padrão) -->
             <div class="fab-menu d-none" id="fabMenu">
-                <a href="receitas?action=cadastrar" class="btn btn-primary">Cadastrar Receita</a>
-                <a href="despesas?action=cadastrar" class="btn btn-success">Cadastrar Despesa</a>
-                <a href="transferencias?action=cadastrar" class="btn btn-warning">Cadastrar Transferência</a>
+                <a href="receitas?action=cadastrar" class="btn btn-success">Cadastrar Receita</a>
+                <a href="despesas?action=cadastrar" class="btn btn-danger">Cadastrar Despesa</a>
+                <a href="transferencias?action=cadastrar" class="btn btn-primary">Cadastrar Transferência</a>
+                <a href="investimentos?action=cadastrar" class="btn btn-warning">Cadastrar Investimento</a>
             </div>
 
             <!-- Botão flutuante principal -->

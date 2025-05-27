@@ -75,7 +75,7 @@
                             <c:when test="${empty expensesByCategory}">
                                 <div class="text-white mt-3 d-flex flex-column text-center" role="alert">
                                     Nenhuma despesa cadastrada no mês atual.
-                                    <a href="despesas" class="mt-3 btn btn-light">Cadastrar nova despesa</a>
+                                    <a href="despesas?action=cadastrar" class="mt-3 btn btn-light">Cadastrar nova despesa</a>
                                 </div>
                             </c:when>
                             <c:otherwise>
@@ -93,12 +93,12 @@
                             <c:when test="${totalExpenses == 0}">
                                 <div class="text-white mt-3 d-flex flex-column text-center" role="alert">
                                     Nenhuma despesa cadastrada no mês atual.
-                                    <a href="despesas" class="mt-3 btn btn-light">Cadastrar nova despesa</a>
+                                    <a href="despesas?action=cadastrar" class="mt-3 btn btn-light">Cadastrar nova despesa</a>
                                 </div>
                             </c:when><c:when test="${totalIncomes == 0}">
                                 <div class="text-white mt-3 d-flex flex-column text-center" role="alert">
                                     Nenhuma receita cadastrada no mês atual.
-                                    <a href="receitas" class="mt-3 btn btn-light">Cadastrar nova receita</a>
+                                    <a href="receitas?action=cadastrar" class="mt-3 btn btn-light">Cadastrar nova receita</a>
                                 </div>
                             </c:when>
                             <c:otherwise>
@@ -114,7 +114,7 @@
                             <c:when test="${totalExpenses == 0}">
                                 <div class="text-white mt-3 d-flex flex-column text-center" role="alert">
                                     Nenhuma despesa cadastrada no mês atual.
-                                    <a href="despesas" class="mt-3 btn btn-light">Cadastrar nova despesa</a>
+                                    <a href="despesas?action=cadastrar" class="mt-3 btn btn-light">Cadastrar nova despesa</a>
                                 </div>
                             </c:when>
                             <c:otherwise>
@@ -136,13 +136,13 @@
                             <c:when test="${!hasExpenses}">
                                 <div class="text-white mt-3 d-flex flex-column text-center" role="alert">
                                     Nenhuma despesa cadastrada no ano atual.
-                                    <a href="despesas" class="mt-3 btn btn-light">Cadastrar nova despesa</a>
+                                    <a href="despesas?action=cadastrar" class="mt-3 btn btn-light">Cadastrar nova despesa</a>
                                 </div>
                             </c:when>
                             <c:when test="${!hasIncomes}">
                                 <div class="text-white mt-3 d-flex flex-column text-center" role="alert">
                                     Nenhuma receita cadastrada no ano atual.
-                                    <a href="receitas" class="mt-3 btn btn-light">Cadastrar nova receita</a>
+                                    <a href="receitas?action=cadastrar" class="mt-3 btn btn-light">Cadastrar nova receita</a>
                                 </div>
                             </c:when>
                             <c:otherwise>
